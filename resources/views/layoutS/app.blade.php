@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
@@ -17,6 +17,9 @@
             --accent-color: #3b82f6;
             --bg-color: #f8fafc;
             --card-radius: 16px;
+			--success-color: #10b981;
+			--danger-color: #ef4444;
+			--warning-color: #f59e0b;
         }
         body {
             font-family: 'Montserrat', sans-serif;
