@@ -111,7 +111,7 @@
         }
         .content {
             margin-left: 280px;
-            padding: 100px 40px 40px;
+            padding: 100px 30px 30px;
             min-height: 100vh;
         }
         /* Cards */
@@ -340,7 +340,10 @@
             });
         });
     </script>
+    @stack('modals')
     @yield('scripts')
 </body>
 </html>
+
+
 

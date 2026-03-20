@@ -3,8 +3,8 @@
 @section('title', 'Daftar Pegawai')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-12 col-xl-11">
+<div class="row">
+    <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
             <h2 style="border-left: 5px solid var(--accent-color); padding-left: 15px; font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary-color);">
                 Daftar Pegawai
@@ -54,7 +54,7 @@
                                     </td>
                                     <td class="text-center pe-4">
                                         <div class="d-flex justify-content-center gap-2">
-                                            <button class="btn btn-warning btn-sm text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-scale" style="width: 38px; height: 38px;" data-bs-toggle="modal" data-bs-target="#editModal{{ $pegawai->id }}" title="Edit">
+                                            <button type="button" class="btn btn-warning btn-sm text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm hover-scale" style="width: 38px; height: 38px;" data-bs-toggle="modal" data-bs-target="#editModal{{ $pegawai->id }}" title="Edit">
                                                 <i class="fa-solid fa-pen-to-square"></i>
                                             </button>
                                             
@@ -68,68 +68,6 @@
                                         </div>
                                     </td>
                                 </tr>
-
-                                <!-- Modal Edit Modern -->
-                                <div class="modal fade" id="editModal{{ $pegawai->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog modal-dialog-centered">
-                                        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-                                            <div class="modal-header border-0 bg-light px-4 py-3" style="border-bottom: 1px solid rgba(0,0,0,0.05) !important;">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                                                        <i class="fa-solid fa-user-pen fs-5"></i>
-                                                    </div>
-                                                    <h5 class="modal-title fw-bold text-dark m-0">Edit Data Pegawai</h5>
-                                                </div>
-                                                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <form action="{{ route('pegawai.update', $pegawai->id) }}" method="POST">
-                                                <div class="modal-body p-4 bg-white">
-                                                    @csrf
-                                                    @method('PUT')
-                                                    
-                                                    <div class="mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">Nama Lengkap</label>
-                                                        <input type="text" class="form-control" name="name" value="{{ $pegawai->name }}" required>
-                                                    </div>
-                                                    
-                                                    <div class="mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">Alamat Lengkap</label>
-                                                        <input type="text" class="form-control" name="alamat" value="{{ $pegawai->alamat }}" required>
-                                                    </div>
-                                                    
-                                                    <div class="row">
-                                                        <div class="col-md-6 mb-3">
-                                                            <label class="form-label text-muted small fw-bold text-uppercase">Nomor Telepon</label>
-                                                            <input type="text" class="form-control" name="nomor" value="{{ $pegawai->nomor }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
-                                                        </div>
-                                                        <div class="col-md-6 mb-3">
-                                                            <label class="form-label text-muted small fw-bold text-uppercase">Jabatan</label>
-                                                            <select class="form-select" name="jabatan" required>
-                                                                <option value="Manager" {{ $pegawai->jabatan == 'Manager' ? 'selected' : '' }}>Manager</option>
-                                                                <option value="Accounting" {{ $pegawai->jabatan == 'Accounting' ? 'selected' : '' }}>Accounting</option>
-                                                                <option value="Sales / Marketing" {{ $pegawai->jabatan == 'Sales / Marketing' ? 'selected' : '' }}>Sales / Marketing</option>
-                                                                <option value="Teknisi" {{ $pegawai->jabatan == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
-                                                                <option value="Operasional" {{ $pegawai->jabatan == 'Operasional' ? 'selected' : '' }}>Operasional</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div class="mb-3">
-                                                        <label class="form-label text-muted small fw-bold text-uppercase">Gaji Pokok</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text bg-light fw-bold text-secondary border-end-0">Rp</span>
-                                                            <input type="text" class="form-control border-start-0" name="gaji" value="{{ $pegawai->gaji }}" oninput="formatRupiah(this)" required>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer border-0 p-4 bg-light d-flex gap-2">
-                                                    <button type="button" class="btn btn-light rounded-pill px-4 flex-fill fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary rounded-pill px-4 flex-fill shadow-sm fw-bold"><i class="fa-solid fa-check me-2"></i> Simpan Perubahan</button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
                             @endforeach
                         </tbody>
                     </table>
@@ -152,6 +90,72 @@
     </div>
 </div>
 
+@push('modals')
+@foreach($pegawaiList as $pegawai)
+<div class="modal fade" id="editModal{{ $pegawai->id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header border-0 bg-light px-4 py-3" style="border-bottom: 1px solid rgba(0,0,0,0.05) !important;">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                        <i class="fa-solid fa-user-pen fs-5"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark m-0">Edit Data Pegawai</h5>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('pegawai.update', $pegawai->id) }}" method="POST">
+                <div class="modal-body p-4 bg-white">
+                    @csrf
+                    @method('PUT')
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Nama Lengkap</label>
+                        <input type="text" class="form-control" name="name" value="{{ $pegawai->name }}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Alamat Lengkap</label>
+                        <input type="text" class="form-control" name="alamat" value="{{ $pegawai->alamat }}" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Nomor Telepon</label>
+                            <input type="text" class="form-control" name="nomor" value="{{ $pegawai->nomor }}" oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Jabatan</label>
+                            <select class="form-select" name="jabatan" required>
+                                <option value="Manager" {{ $pegawai->jabatan == 'Manager' ? 'selected' : '' }}>Manager</option>
+                                <option value="Accounting" {{ $pegawai->jabatan == 'Accounting' ? 'selected' : '' }}>Accounting</option>
+                                <option value="Sales / Marketing" {{ $pegawai->jabatan == 'Sales / Marketing' ? 'selected' : '' }}>Sales / Marketing</option>
+                                <option value="Teknisi" {{ $pegawai->jabatan == 'Teknisi' ? 'selected' : '' }}>Teknisi</option>
+                                <option value="Operasional" {{ $pegawai->jabatan == 'Operasional' ? 'selected' : '' }}>Operasional</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Gaji Pokok</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold text-secondary border-end-0">Rp</span>
+                            <input type="text" class="form-control border-start-0" name="gaji" value="{{ $pegawai->gaji }}" oninput="formatRupiah(this)" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 bg-light d-flex gap-2">
+                    <button type="button" class="btn btn-light rounded-pill px-4 flex-fill fw-bold text-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 flex-fill shadow-sm fw-bold"><i class="fa-solid fa-check me-2"></i> Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endforeach
+@endpush
+
+@section('scripts')
 <script>
 function formatRupiah(el) {
     let value = el.value.replace(/\./g, '').replace(/[^\d]/g, '');
@@ -162,6 +166,9 @@ function formatRupiah(el) {
     el.value = value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 </script>
+
+
+
 <style>
 .form-control, .form-select {
     border-radius: 10px;
@@ -169,6 +176,8 @@ function formatRupiah(el) {
     background-color: #f8fafc !important; /* Force light clear background for text */
     border: 1px solid #e2e8f0;
     color: #1e293b !important; /* Force text color so it's not invisible */
+    z-index: 10;
+    position:relative;
 }
 .form-control:focus, .form-select:focus {
     box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
@@ -191,4 +200,7 @@ function formatRupiah(el) {
 .hover-scale { transition: transform 0.2s ease; }
 .hover-scale:hover { transform: scale(1.1); }
 </style>
+
+
+@endsection
 @endsection

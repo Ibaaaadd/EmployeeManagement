@@ -1,283 +1,164 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('content')
-<div class="container mt-3">
-    <h2 style="border-bottom: 2px solid #198754; padding-bottom: 10px; display: inline-block; font-family: 'Montserrat', sans-serif; font-weight: 600;">
-            PENGGAJIAN
-        </h2>
-    {{-- Form Penggajian --}}
-    <form action="{{ route('gaji.hitung') }}" method="POST">
-        @csrf
-
-        {{-- Pilih Pegawai --}}
-        <div class="mb-3 col-md-6">
-            <label for="pegawai" class="form-label"> Pilih Pegawai </label>
-            <select id="pegawai" name="pegawai_id" class="form-select" required>
-                <option value="" selected>Pilih Pegawai</option>
-                @foreach($pegawaiList as $pegawaiItem)
-                    <option value="{{ $pegawaiItem->id }}" 
-                            data-gaji="{{ $pegawaiItem->gaji }}" 
-                            {{ isset($pegawaiId) && $pegawaiId == $pegawaiItem->id ? 'selected' : '' }}>
-                        {{ $pegawaiItem->name }}
-                    </option>
-                @endforeach
-            </select>
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
+            <h2 style="border-left: 5px solid var(--accent-color); padding-left: 15px; font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary-color);">
+                Proses Penggajian
+            </h2>
         </div>
 
-        <!-- Gaji Pokok -->
-        <div class="mb-3 col-md-6">
-            <label for="gaji_pokok" class="form-label">Gaji Pokok</label>
-            <input type="text" id="gaji_pokok" class="form-control" readonly>
+        <div class="card border-0 shadow-sm animate__animated animate__fadeInUp" style="border-radius: 20px;">
+            <div class="card-header bg-white py-4 d-flex align-items-center" style="border-radius: 20px 20px 0 0; border-bottom: 2px solid #f1f5f9;">
+                <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+                    <i class="fa-solid fa-calculator text-success fs-5"></i>
+                </div>
+                <h5 class="mb-0 text-dark fw-bold">Hitung Gaji Pegawai</h5>
+            </div>
+
+            <div class="card-body p-4 p-md-5">
+                <form action="{{ route('gaji.hitung') }}" method="POST" id="formPenggajian">
+                    @csrf
+
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <label for="pegawai" class="form-label fw-bold text-secondary small text-uppercase">Pilih Pegawai</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user-tie text-muted"></i></span>
+                                <select id="pegawai" name="pegawai_id" class="form-select border-start-0 ps-0" required>
+                                    <option value="" disabled selected>-- Pilih Pegawai --</option>
+                                    @foreach($pegawaiList as $pegawaiItem)
+                                        <option value="{{ $pegawaiItem->id }}" 
+                                                data-gaji="{{ $pegawaiItem->gaji }}" 
+                                                {{ isset($pegawaiId) && $pegawaiId == $pegawaiItem->id ? 'selected' : '' }}>
+                                            {{ $pegawaiItem->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <label for="gaji_pokok" class="form-label fw-bold text-secondary small text-uppercase">Gaji Pokok</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0 fw-bold">Rp</span>
+                                <input type="text" id="gaji_pokok" class="form-control border-start-0 ps-0 bg-light" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="bulan" class="form-label fw-bold text-secondary small text-uppercase">Bulan & Tahun</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-days text-muted"></i></span>
+                                <input type="month" id="bulan" name="bulan" class="form-control border-start-0 ps-0 @error('bulan') is-invalid @enderror" value="{{ old('bulan') }}" required>
+                            </div>
+                            @error('bulan')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="periode" class="form-label fw-bold text-secondary small text-uppercase">Periode Gaji</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-clock text-muted"></i></span>
+                                <select id="periode" name="periode" class="form-select border-start-0 ps-0 @error('periode') is-invalid @enderror" required>
+                                    <option value="1" {{ old('periode') == '1' ? 'selected' : '' }}>Periode 1 (Tgl 1 - 15)</option>
+                                    <option value="2" {{ old('periode') == '2' ? 'selected' : '' }}>Periode 2 (Tgl 16 - Akhir Bulan)</option>
+                                </select>
+                            </div>
+                            @error('periode')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="mt-5 text-end">
+                        <button type="submit" class="btn btn-success rounded-pill px-5 py-2 shadow-sm d-inline-flex align-items-center">
+                            <i class="fa-solid fa-money-check-dollar me-2"></i> Hitung Gaji
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
-        
-        {{-- Pilih Bulan --}}
-        <div class="mb-3 col-md-6">
-            <label for="bulan" class="form-label">Pilih Bulan</label>
-            <input type="month" id="bulan" name="bulan" class="form-control @error('bulan') is-invalid @enderror" value="{{ old('bulan') }}" required>
-            @error('bulan')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
 
-        {{-- Pilih Periode --}}
-        <div class="mb-3 col-md-6">
-            <label for="periode" class="form-label">Periode Gaji</label>
-            <select id="periode" name="periode" class="form-select @error('periode') is-invalid @enderror" required>
-                <option value="1" {{ old('periode') == '1' ? 'selected' : '' }}>Periode 1 (Tanggal 1 - 15)</option>
-                <option value="2" {{ old('periode') == '2' ? 'selected' : '' }}>Periode 2 (Tanggal 16 - Akhir Bulan)</option>
-            </select>
-            @error('periode')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
-        {{-- Insentif --}}
-        <div class="mb-3 col-md-6">
-            <label for="insentif" class="form-label">Insentif</label>
-            <input type="text" name="insentif" id="insentif" class="form-control @error('insentif') is-invalid @enderror" value="{{ old('insentif', 0) }}" min="0" required>
-            @error('insentif')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
-        {{-- Data Absensi --}}
-        <h4>Data Absensi</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Izin</th>
-                    <th>Tidak Hadir</th>
-                    <th>Jumlah Pengurangan (Rp)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td id="izin">{{ isset($jumlahIzin) ? $jumlahIzin : 0 }}</td>
-                    <td id="tidak_hadir">{{ isset($jumlahTidakHadir) ? $jumlahTidakHadir : 0 }}</td>
-                    <td id="pengurangan">{{ isset($potongan) ? number_format($potongan, 0, ',', '.') : 0 }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <button type="submit" class="btn btn-primary">Hitung Gaji</button>
-    </form>
-
-    {{-- Hasil Perhitungan --}}
-    @isset($totalGaji)
-    <hr>
-    <div id="slip-gaji-content">    
-        <div style="text-align: center; margin-bottom: 10px;">
-            <h1 style="font-family: 'Times New Roman', Times, serif; color: orange; margin: 0; font-weight: bold; font-style: italic;">
-                PT. Sarina Indika Makmur
-            </h1>
-            <br>
-            <p style="margin: 0; font-family: 'Times New Roman', Times, serif;">JL. Jend Sudirman No.41/49 A Palembang</p>
-            <p style="margin: 0; font-family: 'Times New Roman', Times, serif;">Telp (0711) 313414/310562 Fax (0711) 312226</p>
-            <hr style="border: 1px solid black; margin-top: 8px;">
-        </div>
-     
-        <h3 style="margin-top: 10px; font-weight: bold; text-align: left;">
-            SLIP GAJI PEGAWAI
-        </h3>
-        <p><strong>Nama</strong> : {{ $pegawai->name }}</p>
-        <p><strong>Jabatan</strong> : {{ $pegawai->jabatan }}</p>
-        <p><strong>Periode</strong> : {{ $periode == 1 ? '1 - 15' : '16 - Akhir Bulan' }} {{ date('F Y', strtotime($bulanTahun)) }}</p>
-
-        <table class="table table-bordered mt-4" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>Komponen</th>
-                    <th>Jumlah</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Gaji Pokok</td>
-                    <td>Rp {{ number_format($gajiPokok, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <td>Insentif</td>
-                    <td>Rp {{ number_format($insentif, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <td class="text-end"><strong>Total</strong></td>
-                    <td><strong>Rp {{ number_format($gajiPokok + $insentif, 0, ',', '.') }}</strong></td>
-                </tr>
-                <tr>
-                    <th colspan="2">Pengurangan</th>
-                </tr>
-                <tr>
-                    <td>Izin</td>
-                    <td>{{ $jumlahIzin }} x Rp 30.000</td>
-                </tr>
-                <tr>
-                    <td>Tanpa Keterangan</td>
-                    <td>{{ $jumlahTidakHadir }} x Rp 30.000</td>
-                </tr>
-                <tr>
-                    <td class="text-end"><strong>Total Pengurangan</strong></td>
-                    <td><strong>Rp {{ number_format($totalPengurangan, 0, ',', '.') }}</strong></td>
-                </tr>
-                <tr>
-                    <td style="width: 50%; text-align: right;"><strong>TOTAL GAJI</strong></td>
-                    <td style="width: 50%;"><strong>Rp {{ number_format($totalGaji, 0, ',', '.') }}</strong></td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div style="text-align: right; margin-top: 50px;">
-            <p>Palembang, {{ date('d F Y') }}</p>
-    
-            <p style="margin-bottom: 0;"><strong>Pegawai yang bersangkutan, </strong></p>
-            <p style="margin-top: 60px;"><strong>______________________</strong></p>
-        </div>
+        {{-- Note: Output / Hasil Perhitungan Biasanya di-render di bawah sini atau via modal / halaman baru (tergantung implementasi backend) --}}
+        @if(isset($hasilHitung) || session('hasil'))
+             <div class="alert alert-info mt-4 animate__animated animate__fadeInUp">Sistem telah memproses gaji. Silahkan cek Histori Gaji.</div>
+        @endif
     </div>
+</div>
 
-  
-        <button onclick="printSlip()" class="btn btn-success mt-3">Cetak Slip Gaji</button>
-@endisset
-
-@if(isset($totalGaji))
-<form action="{{ route('slipgaji.download') }}" method="POST" target="_blank">
-    @csrf
-    <input type="hidden" name="pegawai_id" value="{{ $pegawai->id }}">
-    <input type="hidden" name="periode" value="{{ $periode }}">
-    <input type="hidden" name="bulan" value="{{ $bulanTahun }}">
-    <input type="hidden" name="gaji_pokok" value="{{ $gajiPokok }}">
-    <input type="hidden" name="insentif" value="{{ $insentif }}">
-    <input type="hidden" name="potongan" value="{{ $totalPengurangan }}">
-    <input type="hidden" name="total_gaji" value="{{ $totalGaji }}">
-
-    <button type="submit" class="btn btn-success mt-3">Download PDF</button>
-</form>
-@endif
+<style>
+.form-control:focus, .form-select:focus {
+    box-shadow: none;
+    border-color: #dee2e6;
+}
+.input-group:focus-within .input-group-text, .input-group:focus-within .form-control, .input-group:focus-within .form-select {
+    border-color: var(--success-color);
+}
+.input-group .form-control, .input-group .form-select, .input-group .input-group-text {
+    border-radius: 12px;
+    padding: 12px 15px;
+}
+.input-group-text {
+    background-color: #f8fafc;
+}
+input[readonly] { cursor: not-allowed; }
+</style>
 
 <script>
-    function formatRupiah(angka) {
-        return angka.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+document.addEventListener('DOMContentLoaded', function() {
+    const pegawaiSelect = document.getElementById('pegawai');
+    const gajiPokokInput = document.getElementById('gaji_pokok');
+
+    function formatRupiahJs(angka, prefix){
+        var number_string = angka.replace(/[^,\d]/g, '').toString(),
+        split   = number_string.split(','),
+        sisa     = split[0].length % 3,
+        rupiah     = split[0].substr(0, sisa),
+        ribuan     = split[0].substr(sisa).match(/\d{3}/gi);
+
+        if(ribuan){
+            separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+
+        rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+        return prefix == undefined ? rupiah : (rupiah ? rupiah : '');
     }
 
-    document.getElementById('pegawai').addEventListener('change', function () {
-    const gaji = this.options[this.selectedIndex].getAttribute('data-gaji') || 0;
-    document.getElementById('gaji_pokok').value = formatRupiah(gaji);
+    pegawaiSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const gaji = selectedOption.getAttribute('data-gaji');
 
-    document.getElementById('izin').innerText = '0';
-    document.getElementById('tidak_hadir').innerText = '0';
-    document.getElementById('pengurangan').innerText = '0';
-    
+        if(gaji) {
+            // Remove existing dots before re-formatting (just in case)
+            let cleanGaji = gaji.replace(/\./g, '');
+            gajiPokokInput.value = formatRupiahJs(cleanGaji, '');
+        } else {
+            gajiPokokInput.value = '';
+        }
     });
 
-    @isset($pegawai)
-        document.getElementById('gaji_pokok').value = formatRupiah({{ $pegawai->gaji }});
-    @endisset
-</script>
+    // Trigger change on load if an option is already selected
+    if(pegawaiSelect.value) {
+        pegawaiSelect.dispatchEvent(new Event('change'));
+    }
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-    function fetchAbsensi() {
-        const pegawaiId = $('#pegawai').val();
-        const periode = $('#periode').val();
-        const bulan = $('#bulan').val();
-
-        if(pegawaiId && periode && bulan) {
-            $.ajax({
-                url: "{{ route('api.absensi') }}",
-                type: 'GET',
-                data: {
-                    pegawai_id: pegawaiId,
-                    periode: periode,
-                    bulan: bulan
-                },
-                success: function(response) {
-                    $('#izin').text(response.izin);
-                    $('#tidak_hadir').text(response.tidak_hadir);
-                    $('#pengurangan').text(response.potongan.toLocaleString('id-ID'));
-                },
-                error: function() {
-                    $('#izin').text('0');
-                    $('#tidak_hadir').text('0');
-                    $('#pengurangan').text('0');
+    document.getElementById('formPenggajian').addEventListener('submit', function(e) {
+        if(this.checkValidity()) {
+            Swal.fire({
+                title: 'Menghitung Penggajian...',
+                html: 'Tunggu sebentar, sedang memproses data kehadiran',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
             });
-        } else {
-            $('#izin').text('0');
-            $('#tidak_hadir').text('0');
-            $('#pengurangan').text('0');
         }
-    }
-
-    
-    $('#pegawai, #periode, #bulan').on('change', fetchAbsensi);
-
-    
-    $(document).ready(function() {
-        fetchAbsensi();
     });
+});
 </script>
-
-<script>
-    function printSlip() {
-    var printContent = document.getElementById("slip-gaji-content");  // Get content to print
-    
-    if (!printContent) {
-        console.log('Slip gaji content tidak ditemukan');
-        return; 
-    }
-
-    var printWindow = window.open('', '', 'height=600,width=800');
-    printWindow.document.write('<html><head><title>Slip Gaji</title>');
-    printWindow.document.write('<style>body { font-family: Arial, sans-serif; margin: 20px; }');
-    printWindow.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
-    printWindow.document.write('table, th, td { border: 1px solid black; padding: 8px; text-align: left; }</style>');
-    printWindow.document.write('</head><body>');
-    
-    console.log(printContent.outerHTML);
-    
-    printWindow.document.write(printContent.outerHTML);  
-    printWindow.document.write('</body></html>');
-    
-    printWindow.document.close();  
-    printWindow.print();  
-}
-
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const insentifInput = document.getElementById('insentif');
-
-        insentifInput.addEventListener('input', function (e) {
-            let value = e.target.value;
-            value = value.replace(/\./g, '');
-            if (!/^\d*$/.test(value)) {
-                value = value.replace(/[^\d]/g, '');
-            }
-            const formatted = new Intl.NumberFormat('id-ID').format(value);
-            e.target.value = formatted;
-        });
-    });
-</script>
-
-
 @endsection
+

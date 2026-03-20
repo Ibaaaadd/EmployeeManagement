@@ -1,8 +1,8 @@
 ﻿@extends('layouts.app')
 
 @section('content')
-<div class="row justify-content-center">
-    <div class="col-12 col-xl-11">
+<div class="row">
+    <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
             <h2 style="border-left: 5px solid var(--accent-color); padding-left: 15px; font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary-color);">
                 Absensi Pegawai
@@ -273,3 +273,4 @@
 .list-group-item:hover { background-color: #f8fafc; }
 </style>
 @endsection
+
