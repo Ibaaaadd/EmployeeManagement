@@ -15,6 +15,7 @@ Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('l
 Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/absensi', function () {
     return view('absensi'); // Halaman absensi
 });
