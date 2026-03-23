@@ -131,8 +131,9 @@ class AbsensiController extends Controller
 
     $absensis = $query->orderBy('attendance_time', 'desc')->get();
     $rekapPegawai = array_values($rekapPegawai);
+    $pegawaiList = \App\Models\Pegawai::all();
 
-    return view('riwayat-absensi', compact('absensis', 'rekapPegawai'));
+    return view('riwayat-absensi', compact('absensis', 'rekapPegawai', 'pegawaiList'));
 }
 
     public function downloadPDF(Request $request)

@@ -169,8 +169,9 @@ class PenggajianController extends Controller
     }
 
     $riwayat = $query->orderBy('created_at', 'desc')->get();
+    $pegawaiList = \App\Models\Pegawai::all();
 
-    return view('riwayat', compact('riwayat'));
+    return view('riwayat', compact('riwayat', 'pegawaiList'));
     }
 
 
