@@ -46,6 +46,17 @@
                                 <input type="text" id="gaji_pokok" class="form-control border-start-0 ps-0 bg-light" readonly>
                             </div>
                         </div>
+
+                        <div class="col-md-12">
+                            <label for="insentif" class="form-label fw-bold text-secondary small text-uppercase">Insentif / Bonus (Opsional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-money-bill-trend-up text-muted"></i></span>
+                                <input type="number" id="insentif" name="insentif" class="form-control border-start-0 ps-0 @error('insentif') is-invalid @enderror" value="{{ old('insentif', 0) }}" min="0">
+                            </div>
+                             @error('insentif')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
                         
                         <div class="col-md-6">
                             <label for="bulan" class="form-label fw-bold text-secondary small text-uppercase">Bulan & Tahun</label>

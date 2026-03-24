@@ -118,7 +118,11 @@
                                 </table>
                             </div>
                             
-                            <div class="text-end">
+                            <div class="mt-4 px-2">
+                                {{ $absensis->links() }}
+                            </div>
+
+                            <div class="text-end mt-3">
                                 <a href="{{ route('absensi.riwayat.download', request()->query()) }}" class="btn btn-danger rounded-pill shadow-sm px-4">
                                     <i class="fa-solid fa-file-pdf me-2"></i> Download Rekap PDF
                                 </a>

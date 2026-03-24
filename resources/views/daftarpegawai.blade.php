@@ -75,6 +75,12 @@
                     <i class="fa-solid fa-plus me-2"></i> Tambah Pegawai
                 </a>
             </x-slot>
+
+            @if(!$pegawaiList->isEmpty())
+                <x-slot name="pagination">
+                    {{ $pegawaiList->links() }}
+                </x-slot>
+            @endif
         </x-datatable>
     </div>
 </div>

@@ -83,7 +83,7 @@ class PegawaiController extends Controller
     }
     public function showAll()
     {
-        $pegawaiList = Pegawai::all();
+        $pegawaiList = Pegawai::paginate(10);
         return view('daftarpegawai', compact('pegawaiList'));
     }
 }

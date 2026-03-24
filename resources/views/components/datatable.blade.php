@@ -36,4 +36,9 @@
             </div>
         @endif
     </div>
+    @if(isset($pagination))
+    <div class="card-footer bg-white border-top-0 px-4 py-3" style="border-radius: 0 0 var(--card-radius, 20px) var(--card-radius, 20px);">
+        {{ $pagination }}
+    </div>
+    @endif
 </div>

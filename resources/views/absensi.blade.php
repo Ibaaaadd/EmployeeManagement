@@ -11,7 +11,7 @@
 
         <div class="row g-4">
             <!-- Input Form Absensi -->
-            <div class="col-md-7">
+            <div class="col-md-12">
                 <div class="card border-0 shadow-sm animate__animated animate__fadeInLeft" style="border-radius: 20px;">
                     <div class="card-header bg-white py-3 px-4" style="border-radius: 20px 20px 0 0; border-bottom: 2px solid #f1f5f9;">
                         <h6 class="mb-0 text-dark fw-bold"><i class="fa-solid fa-clipboard-user text-primary me-2"></i> Form Absensi</h6>
@@ -21,7 +21,7 @@
                             @csrf
                             <div class="mb-3">
                                 <label for="employee_id" class="form-label fw-bold text-secondary small text-uppercase">Nama Pegawai</label>
-                                <select class="form-select w-100" id="employee_id" name="employee_id" required>
+                                <select class="form-select w-100 select-search" id="employee_id" name="employee_id" required>
                                     <option value="" disabled selected>-- Pilih Pegawai --</option>
                                     @foreach($pegawaiList as $pegawai)
                                         <option value="{{ $pegawai->id }}">{{ $pegawai->name }}</option>
@@ -71,38 +71,47 @@
                     </div>
                 </div>
             </div>
-
+            
             <!-- Tabel Pegawai Belum Absen -->
-            <div class="col-md-5">
-                <div class="card border-0 shadow-sm animate__animated animate__fadeInRight animate__delay-1s" style="border-radius: 20px;">
-                    <div class="card-header bg-warning bg-opacity-10 py-3 px-4 d-flex align-items-center" style="border-radius: 20px 20px 0 0; border-bottom: 2px solid #fef3c7;">
-                        <div class="bg-warning text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 35px; height: 35px;">
-                            <i class="fa-solid fa-clock-rotate-left"></i>
-                        </div>
-                        <h6 class="mb-0 text-dark fw-bold">Belum Absen Hari Ini</h6>
-                    </div>
-                    <div class="card-body p-0">
-                        @if($pegawaiBelumAbsen->isEmpty())
-                            <div class="p-5 text-center">
-                                <i class="fa-solid fa-circle-check text-success mb-3" style="font-size: 3rem; opacity: 0.5;"></i>
-                                <h6 class="text-muted fw-bold">Semua pegawai sudah absen!</h6>
-                                <p class="small text-muted mb-0">Kerja bagus semuanya hadir.</p>
-                            </div>
-                        @else
-                            <div class="list-group list-group-flush" style="max-height: 420px; overflow-y: auto;">
-                                @foreach($pegawaiBelumAbsen as $pegawai)
-                                    <div class="list-group-item d-flex align-items-center py-3 px-4 border-bottom">
-                                        <div class="bg-light text-secondary rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm" style="width: 35px; height: 35px; font-weight: bold;">
-                                            {{ strtoupper(substr($pegawai->name, 0, 1)) }}
-                                        </div>
-                                        <div class="fw-bold text-dark" style="font-size: 0.95rem;">{{ $pegawai->name }}</div>
-                                        <span class="badge bg-danger ms-auto rounded-pill px-3">Pending</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                </div>
+            <div class="col-md-12 mt-4">
+                @component('components.datatable', [
+                    'id' => 'tabelBelumAbsen',
+                    'title' => 'Daftar Pegawai Belum Absen Hari Ini',
+                    'icon' => 'fa-solid fa-clock-rotate-left',
+                    'empty' => $pegawaiBelumAbsen->isEmpty()
+                ])
+                    @slot('head')
+                        <th class="ps-4">Profil</th>
+                        <th>Nama Pegawai</th>
+                        <th>Jabatan</th>
+                        <th class="text-center">Status</th>
+                    @endslot
+
+                    @slot('body')
+                        @foreach($pegawaiBelumAbsen as $pegawai)
+                        <tr>
+                            <td class="ps-4">
+                                <div class="bg-light text-secondary rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 40px; height: 40px; font-weight: bold;">
+                                    {{ strtoupper(substr($pegawai->name, 0, 1)) }}
+                                </div>
+                            </td>
+                            <td class="fw-bold text-dark">{{ $pegawai->name }}</td>
+                            <td class="text-muted">{{ $pegawai->jabatan ?? '-' }}</td>
+                            <td class="text-center">
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2">
+                                    <i class="fa-solid fa-hourglass-half me-1"></i> Pending
+                                </span>
+                            </td>
+                        </tr>
+                        @endforeach
+                    @endslot
+
+                    @if(!$pegawaiBelumAbsen->isEmpty())
+                        @slot('pagination')
+                            {{ $pegawaiBelumAbsen->links() }}
+                        @endslot
+                    @endif
+                @endcomponent
             </div>
         </div> 
     </div>
@@ -272,5 +281,34 @@
 .list-group-item { transition: background-color 0.2s; }
 .list-group-item:hover { background-color: #f8fafc; }
 </style>
+
+@section('scripts')
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if(document.querySelector('.select-search')) {
+            new TomSelect('.select-search', {
+                create: false,
+                sortField: { field: "text", direction: "asc" }
+            });
+        }
+    });
+</script>
+<style>
+.ts-control {
+    border-radius: 10px;
+    padding: 12px 16px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    box-shadow: none;
+}
+.ts-control.focus {
+    background-color: #fff;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+</style>
+@endsection
 @endsection
 

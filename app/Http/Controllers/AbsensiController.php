@@ -20,7 +20,7 @@ class AbsensiController extends Controller
 
         $sudahAbsenIds = Absensi::whereDate('attendance_time', $today)->pluck('pegawai_id');
 
-        $pegawaiBelumAbsen = Pegawai::whereNotIn('id', $sudahAbsenIds)->get();
+        $pegawaiBelumAbsen = Pegawai::whereNotIn('id', $sudahAbsenIds)->paginate(10);
 
         return view('absensi', [
             'pegawaiList' => Pegawai::all(),
@@ -90,12 +90,13 @@ class AbsensiController extends Controller
               ->whereYear('attendance_time', $tanggal->year);
     }
 
-    $absensis = $query->orderBy('attendance_time', 'desc')->get();
+    $query->orderBy('attendance_time', 'desc');
+    $semuaAbsensi = $query->get();
 
     // ========== Rekap Per Pegawai ==========
     $rekapPegawai = [];
 
-    foreach ($absensis as $absen) {
+    foreach ($semuaAbsensi as $absen) {
         $nama = $absen->pegawai->name;
         $tanggal = \Carbon\Carbon::parse($absen->attendance_time)->format('d-m-Y');
 
@@ -129,7 +130,7 @@ class AbsensiController extends Controller
         }
     }
 
-    $absensis = $query->orderBy('attendance_time', 'desc')->get();
+    $absensis = $query->paginate(10)->withQueryString();
     $rekapPegawai = array_values($rekapPegawai);
     $pegawaiList = \App\Models\Pegawai::all();
 

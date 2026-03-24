@@ -63,13 +63,13 @@ class PenggajianController extends Controller
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
             'periode' => 'required|in:1,2',
-            'insentif' => 'required|integer|min:0',
             'bulan' => 'required|date_format:Y-m',
         ]);
 
         $pegawai = Pegawai::findOrFail($request->pegawai_id);
         $periode = $request->periode;
         $bulanTahun = $request->bulan;
+        $insentif = $request->insentif ?? 0;
 
         if ($periode == '1') {
             $startDate = "$bulanTahun-01";
@@ -105,6 +105,7 @@ class PenggajianController extends Controller
         ]);
 
         $pegawaiList = Pegawai::all();
+        $hasilHitung = true;
 
         return view('penggajian', compact(
         'pegawaiList',
@@ -116,7 +117,8 @@ class PenggajianController extends Controller
         'insentif',
         'totalPengurangan',
         'totalGaji',
-        'bulanTahun'
+        'bulanTahun',
+        'hasilHitung'
     ))->with('pegawaiId', $request->pegawai_id);
 
     }
