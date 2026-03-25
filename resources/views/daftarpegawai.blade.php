@@ -33,7 +33,7 @@
                         <td class="ps-4 fw-bold text-muted">{{ $index + 1 }}</td>
                         <td>
                             <div class="d-flex align-items-center py-2">
-                                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm flex-shrink-0" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.2rem;">
+                                <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center me-3 shadow-sm shrink-0" style="width: 45px; height: 45px; font-weight: bold; font-size: 1.2rem;">
                                     {{ strtoupper(substr($pegawai->name, 0, 1)) }}
                                 </div>
                                 <div>
