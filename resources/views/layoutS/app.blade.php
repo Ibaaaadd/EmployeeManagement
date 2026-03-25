@@ -37,13 +37,17 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 4px 0 15px rgba(0,0,0,0.05);
             z-index: 1050;
+            display: flex;
+            flex-direction: column;
         }
         .brand {
             font-size: 22px;
             font-weight: 700;
             color: white;
-            padding: 24px;
-            text-align: center;
+            height: 75px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             background: rgba(0,0,0,0.2);
             letter-spacing: 1px;
@@ -257,6 +261,15 @@
                     <img src="https://ui-avatars.com/api/?name=Admin&background=1e293b&color=fff" alt="Admin" class="rounded-circle shadow-sm" width="45" height="45">
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-3" style="border-radius: 12px; min-width: 200px;">
+                    <li>
+                        <a href="{{ route('profile.edit') }}" class="dropdown-item text-dark py-2 fw-bold d-flex align-items-center">
+                            <span class="bg-light text-secondary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                <i class="fa-solid fa-gear"></i>
+                            </span> 
+                            Pengaturan
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
