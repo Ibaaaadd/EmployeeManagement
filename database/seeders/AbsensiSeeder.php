@@ -16,22 +16,28 @@ class AbsensiSeeder extends Seeder
         $pegawais = Pegawai::all();
         $data = [];
 
-        // Generate data absensi untuk sebulan terakhir (maret 2026 atau sesuai now) 
-        // sebanyak 20 hari kerja untuk tiap pegawai
+// Generate data absensi untuk 30 hari ke belakang
+        $startDate = Carbon::now()->subDays(30);
+        $endDate = Carbon::now();
+
         foreach ($pegawais as $pegawai) {
-            for ($i = 0; $i < 20; $i++) {
-                $status = $faker->randomElement(['Hadir', 'Hadir', 'Hadir', 'Hadir', 'Izin', 'Tidak Hadir']); // presentase hadir lebih besar
-                $timestamp = Carbon::now()->subDays(random_int(1, 40))->setTime(random_int(7, 9), random_int(0, 59), 0);
-                
-                $data[] = [
-                    'pegawai_id' => $pegawai->id,
-                    'pegawai_name' => $pegawai->name,
-                    'status' => $status,
-                    'attendance_photo' => $status === 'Hadir' ? 'foto_dummy.jpg' : null,
-                    'attendance_time' => $timestamp,
-                    'created_at' => $timestamp,
-                    'updated_at' => $timestamp,
-                ];
+            $currentDate = $startDate->copy();
+            while ($currentDate <= $endDate) {
+                if ($currentDate->isWeekday()) {
+                    $status = $faker->randomElement(['Hadir', 'Hadir', 'Hadir', 'Hadir', 'Izin', 'Tidak Hadir']);
+                    $timestamp = $currentDate->copy()->setTime(random_int(7, 9), random_int(0, 59), 0);
+                    
+                    $data[] = [
+                        'pegawai_id' => $pegawai->id,
+                        'pegawai_name' => $pegawai->name,
+                        'status' => $status,
+                        'attendance_photo' => $status === 'Hadir' ? 'foto_dummy.jpg' : null,
+                        'attendance_time' => $timestamp,
+                        'created_at' => $timestamp,
+                        'updated_at' => $timestamp,
+                    ];
+                }
+                $currentDate->addDay();
             }
         }
 

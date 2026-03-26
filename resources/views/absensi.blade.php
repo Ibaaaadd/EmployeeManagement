@@ -43,6 +43,17 @@
                                 </div>
                             </div>
 
+                            <div class="mb-3" id="tipe_absen_div" style="display: none;">
+                                <label class="form-label fw-bold text-secondary small text-uppercase d-block mb-2">Tipe Absen</label>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <input type="radio" class="btn-check" name="tipe_absen" id="masuk" value="masuk" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold custom-btn-check" for="masuk"><i class="fa-solid fa-arrow-right-to-bracket me-1"></i> Masuk (Max 08:00 WIB)</label>
+                                    
+                                    <input type="radio" class="btn-check" name="tipe_absen" id="pulang" value="pulang" autocomplete="off">
+                                    <label class="btn btn-outline-info rounded-pill px-4 py-2 fw-bold custom-btn-check" for="pulang"><i class="fa-solid fa-arrow-right-from-bracket me-1"></i> Pulang</label>
+                                </div>
+                            </div>
+
                             <div class="mb-3 text-center p-3 bg-light rounded-3" id="attendance_photo_div" style="display: none; border: 2px dashed #cbd5e1;">
                                 <label class="form-label fw-bold text-secondary small text-uppercase mb-2">Ambil Foto Kehadiran</label>
                                 <div class="webcam-container mx-auto mb-2" style="width: 320px; height: 240px; overflow: hidden; border-radius: 12px; background: #000; position: relative;">
@@ -121,21 +132,30 @@
     function toggleCamera() {
         var status = document.querySelector('input[name="status"]:checked').value;  
         var attendancePhotoDiv = document.getElementById("attendance_photo_div");  
+        var tipeAbsenDiv = document.getElementById("tipe_absen_div");
         var webcam = document.getElementById("webcam");  
         var takePhotoBtn = document.getElementById("takePhotoBtn");  
         var photoInput = document.getElementById("attendance_photo");
+        var tipeAbsenInputs = document.querySelectorAll('input[name="tipe_absen"]');
 
         if (status === "Hadir") {
             attendancePhotoDiv.style.display = "block"; 
+            tipeAbsenDiv.style.display = "block";
             takePhotoBtn.style.display = "inline-block";
             photoInput.disabled = false;
+            tipeAbsenInputs.forEach(input => input.required = true);
             startCamera();  
         } else {
             attendancePhotoDiv.style.display = "none";  
+            tipeAbsenDiv.style.display = "none";
             takePhotoBtn.style.display = "none";        
             webcam.style.display = "none";              
             photoInput.disabled = true; 
             photoInput.value = "";
+            tipeAbsenInputs.forEach(input => {
+                input.required = false;
+                input.checked = false;
+            });
             stopCamera(); 
         }
     }

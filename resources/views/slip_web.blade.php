@@ -286,7 +286,7 @@
             <div class="info-item" style="grid-column: span 2;">
                 <span class="info-label">Periode</span>
                 <span class="info-separator">:</span>
-                <span class="info-value">{{ $periode == 1 ? '1 - 15' : '16 - Akhir Bulan' }} {{ date('F Y', strtotime($bulanTahun)) }}</span>
+                <span class="info-value">{{ $periode }} {{ date('F Y', strtotime($bulanTahun)) }}</span>
             </div>
         </div>
 
@@ -315,12 +315,12 @@
                     <td colspan="2">PENGURANGAN (POTONGAN)</td>
                 </tr>
                 <tr>
-                    <td>Izin ({{ $jumlahIzin }} Hari x Rp 30.000)</td>
-                    <td class="amount">{{ number_format($jumlahIzin * 30000, 0, ',', '.') }}</td>
+                    <td>Izin ({{ $jumlahIzin }} Hari x Rp {{ number_format($gajiPerHari ?? 30000, 0, ',', '.') }})</td>
+                    <td class="amount">{{ number_format($jumlahIzin * ($gajiPerHari ?? 30000), 0, ',', '.') }}</td>
                 </tr>
                 <tr>
-                    <td>Tidak Hadir ({{ $jumlahTidakHadir }} Hari x Rp 30.000)</td>
-                    <td class="amount">{{ number_format($jumlahTidakHadir * 30000, 0, ',', '.') }}</td>
+                    <td>Tidak Hadir ({{ $jumlahTidakHadir }} Hari x Rp {{ number_format($gajiPerHari ?? 30000, 0, ',', '.') }})</td>
+                    <td class="amount">{{ number_format($jumlahTidakHadir * ($gajiPerHari ?? 30000), 0, ',', '.') }}</td>
                 </tr>
                 <tr class="subtotal-row">
                     <td>Total Potongan</td>

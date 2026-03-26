@@ -35,41 +35,77 @@ class AbsensiController extends Controller
         $request->validate([
             'employee_id' => 'required|exists:pegawais,id',
             'status' => 'required|in:Hadir,Izin,Tidak Hadir',
+            'tipe_absen' => 'required_if:status,Hadir|in:masuk,pulang',
             'attendance_photo' => 'nullable|string', // Validasi base64 string
             'attendance_time' => 'required|date',
         ]);
 
         // Cari pegawai berdasarkan ID
         $pegawai = Pegawai::findOrFail($request->employee_id);
+        $timeReq = \Carbon\Carbon::parse($request->attendance_time);
+        $today = $timeReq->toDateString();
 
-        // Simpan data absensi
-        $absensi = new Absensi();
-        $absensi->pegawai_id = $pegawai->id;
-        
-        // Simpan nama pegawai juga jika kolom ada di tabel absensi
-        $absensi->pegawai_name = $pegawai->name;  
+        $absensi = Absensi::where('pegawai_id', $pegawai->id)
+                          ->whereDate('attendance_time', $today)
+                          ->first();
 
-        $absensi->status = $request->status;
-        $absensi->attendance_time = $request->attendance_time;
-
-        // Jika status 'Hadir' dan ada foto, simpan foto tersebut
-        if ($request->status == 'Hadir' && $request->has('attendance_photo')) {
-            // Konversi base64 menjadi file dan simpan di storage
-            $photo = $request->attendance_photo;  // Base64 image
-            $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $photo));  // Remove base64 header
-            
-            // Generate file name (optional: timestamp for uniqueness)
-            $fileName = 'attendance_' . time() . '.png';  // Save as PNG (or adjust extension as needed)
-            
-            // Save the file to storage
+        // Handle foto
+        $photoPath = null;
+        if ($request->status == 'Hadir' && $request->has('attendance_photo') && !empty($request->attendance_photo)) {
+            $photo = $request->attendance_photo;
+            $image = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $photo));
+            // Tambahkan flag tipe absen di nama file agar tidak overwrite
+            $fileName = 'attendance_' . time() . '_' . $request->tipe_absen . '.png';
             Storage::disk('public')->put('attendance_photos/' . $fileName, $image);
-
-            // Simpan path file ke dalam database
-            $absensi->attendance_photo = 'attendance_photos/' . $fileName;
+            $photoPath = 'attendance_photos/' . $fileName;
         }
 
-        // Simpan data absensi ke database
-        $absensi->save();
+        if ($request->status == 'Hadir') {
+            if ($request->tipe_absen == 'masuk') {
+                if ($absensi && $absensi->jam_masuk) {
+                    return redirect()->back()->with('error', 'Pegawai sudah melakukan absen masuk hari ini.');
+                }
+                
+                if (!$absensi) {
+                    $absensi = new Absensi();
+                    $absensi->pegawai_id = $pegawai->id;
+                    $absensi->pegawai_name = $pegawai->name;
+                    $absensi->status = 'Hadir';
+                    $absensi->attendance_time = $request->attendance_time;
+                }
+                
+                $absensi->jam_masuk = $timeReq->format('H:i:s');
+                if ($photoPath) $absensi->attendance_photo = $photoPath;
+
+                // Cek keterlambatan (> 08:00)
+                $cutoff = \Carbon\Carbon::parse($today . ' 08:00:00');
+                $absensi->is_late = $timeReq->greaterThan($cutoff);
+                
+                $absensi->save();
+            } else if ($request->tipe_absen == 'pulang') {
+                if (!$absensi || !$absensi->jam_masuk) {
+                    return redirect()->back()->with('error', 'Pegawai belum absen masuk hari ini.');
+                }
+                if ($absensi->jam_pulang) {
+                    return redirect()->back()->with('error', 'Pegawai sudah melakukan absen pulang hari ini.');
+                }
+
+                $absensi->jam_pulang = $timeReq->format('H:i:s');
+                if ($photoPath) $absensi->attendance_photo_pulang = $photoPath;
+                $absensi->save();
+            }
+        } else {
+            // Izin atau Tidak Hadir
+            if ($absensi) {
+                return redirect()->back()->with('error', 'Data absensi hari ini sudah ada.');
+            }
+            $absensi = new Absensi();
+            $absensi->pegawai_id = $pegawai->id;
+            $absensi->pegawai_name = $pegawai->name;
+            $absensi->status = $request->status;
+            $absensi->attendance_time = $request->attendance_time;
+            $absensi->save();
+        }
 
         return redirect()->route('absensi.index')->with('success', 'Absensi berhasil dilakukan!');
     }

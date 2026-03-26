@@ -71,7 +71,7 @@
                                     <td>
                                         <span class="badge bg-info text-dark bg-opacity-10 py-2 px-3 rounded-pill border border-info border-opacity-25">
                                             <i class="fa-regular fa-calendar me-1"></i>
-                                            {{ \Carbon\Carbon::parse($item->tanggal_gaji)->translatedFormat('F Y') }}
+                                            {{ \Carbon\Carbon::parse($item->tanggal)->translatedFormat('F Y') }}
                                         </span>
                                     </td>
                                     <td>

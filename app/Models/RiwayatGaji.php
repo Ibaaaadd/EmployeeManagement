@@ -17,6 +17,11 @@ class RiwayatGaji extends Model
         'insentif',
         'potongan',
         'total_gaji',
+        'jumlah_izin',
+        'jumlah_tidak_hadir',
+        'total_hari_kerja',
+        'gaji_per_hari',
+        'tanggal_merah',
         'pdf_path',
     ];
 

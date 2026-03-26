@@ -185,7 +185,7 @@
                     <td><b>{{ $pegawai->name }}</b></td>
                     <td class="info-label">Periode</td>
                     <td style="width: 15px;">:</td>
-                    <td><b>{{ $periode == 1 ? '1 - 15' : '16 - Akhir Bulan' }} {{ date('F Y', strtotime($bulanTahun)) }}</b></td>
+                    <td><b>{{ $periode }} {{ date('F Y', strtotime($bulanTahun)) }}</b></td>
                 </tr>
                 <tr>
                     <td class="info-label">Jabatan</td>
@@ -221,12 +221,12 @@
                     <td colspan="2">PENGURANGAN (POTONGAN)</td>
                 </tr>
                 <tr>
-                    <td>Izin ({{ $jumlahIzin }} Hari x Rp 30.000)</td>
-                    <td class="amount">{{ number_format($jumlahIzin * 30000, 0, ',', '.') }}</td>
+                    <td>Izin ({{ $jumlahIzin }} Hari x Rp {{ number_format($gajiPerHari ?? 30000, 0, ',', '.') }})</td>
+                    <td class="amount">{{ number_format($jumlahIzin * ($gajiPerHari ?? 30000), 0, ',', '.') }}</td>
                 </tr>
                 <tr>
-<td>Tidak Hadir ({{ $jumlahTidakHadir }} Hari x Rp 30.000)</td>
-                    <td class="amount">{{ number_format($jumlahTidakHadir * 30000, 0, ',', '.') }}</td>
+<td>Tidak Hadir ({{ $jumlahTidakHadir }} Hari x Rp {{ number_format($gajiPerHari ?? 30000, 0, ',', '.') }})</td>
+                    <td class="amount">{{ number_format($jumlahTidakHadir * ($gajiPerHari ?? 30000), 0, ',', '.') }}</td>
                 </tr>
                 <tr class="subtotal-row">
                     <td>Total Potongan</td>

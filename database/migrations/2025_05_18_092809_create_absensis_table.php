@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('absensis', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('pegawai_id')->constrained('pegawais')->cascadeOnDelete();  // Relasi dengan pegawais
-            $table->string('status');  // Status kehadiran: Hadir, Izin, Tanpa Keterangan
-            $table->string('attendance_photo')->nullable();  // Foto absensi (jika Hadir)
-            $table->timestamp('attendance_time');  // Waktu absensi
+            $table->foreignId('pegawai_id')->constrained('pegawais')->cascadeOnDelete();
+            $table->string('pegawai_name')->nullable();
+            $table->string('status');
+            $table->string('attendance_photo')->nullable();
+            $table->string('attendance_photo_pulang')->nullable();
+            $table->timestamp('attendance_time')->nullable();
+            $table->time('jam_masuk')->nullable();
+            $table->time('jam_pulang')->nullable();
+            $table->boolean('is_late')->default(false);
             $table->timestamps();
         });
     }

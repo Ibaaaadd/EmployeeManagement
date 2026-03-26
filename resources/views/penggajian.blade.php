@@ -26,7 +26,7 @@
                             <label for="pegawai" class="form-label fw-bold text-secondary small text-uppercase">Pilih Pegawai</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user-tie text-muted"></i></span>
-                                <select id="pegawai" name="pegawai_id" class="form-select border-start-0 ps-0" required>
+                                <select id="pegawai" name="pegawai_id" class="form-select border-start-0 ps-0 select-search" required>
                                     <option value="" disabled selected>-- Pilih Pegawai --</option>
                                     @foreach($pegawaiList as $pegawaiItem)
                                         <option value="{{ $pegawaiItem->id }}" 
@@ -70,15 +70,13 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label for="periode" class="form-label fw-bold text-secondary small text-uppercase">Periode Gaji</label>
+                            <label for="tanggal_merah" class="form-label fw-bold text-secondary small text-uppercase">Tanggal Merah (Opsional)</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-clock text-muted"></i></span>
-                                <select id="periode" name="periode" class="form-select border-start-0 ps-0 @error('periode') is-invalid @enderror" required>
-                                    <option value="1" {{ old('periode') == '1' ? 'selected' : '' }}>Periode 1 (Tgl 1 - 15)</option>
-                                    <option value="2" {{ old('periode') == '2' ? 'selected' : '' }}>Periode 2 (Tgl 16 - Akhir Bulan)</option>
-                                </select>
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-xmark text-muted"></i></span>
+                                <input type="text" id="tanggal_merah" name="tanggal_merah" class="form-control border-start-0 ps-0 @error('tanggal_merah') is-invalid @enderror" value="{{ old('tanggal_merah') }}" placeholder="Contoh: 1, 17, 25">
                             </div>
-                            @error('periode')
+                            <div class="text-muted small mt-1">*Masukkan tanggal yang merupakan hari libur (selain Sabtu & Minggu), pisahkan dengan koma.</div>
+                            @error('tanggal_merah')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
@@ -101,11 +99,32 @@
 </div>
 
 <style>
+.ts-control {
+    border-radius: 12px;
+    padding: 12px 15px;
+    border: 1px solid #dee2e6;
+    background-color: #fff;
+    box-shadow: none;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+}
+.ts-control.focus {
+    background-color: #fff;
+    border-color: var(--success-color);
+    box-shadow: none;
+}
+.input-group.ts-wrapper {
+    display: flex;
+}
+.input-group > .ts-wrapper {
+    flex: 1 1 auto;
+    width: 1%;
+}
 .form-control:focus, .form-select:focus {
     box-shadow: none;
     border-color: #dee2e6;
 }
-.input-group:focus-within .input-group-text, .input-group:focus-within .form-control, .input-group:focus-within .form-select {
+.input-group:focus-within .input-group-text, .input-group:focus-within  {
     border-color: var(--success-color);
 }
 .input-group .form-control, .input-group .form-select, .input-group .input-group-text {
@@ -118,8 +137,17 @@
 input[readonly] { cursor: not-allowed; }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.select-search').forEach((el) => {
+        new TomSelect(el, {
+            create: false,
+            sortField: { field: "text", direction: "asc" }
+        });
+    });
+
     const pegawaiSelect = document.getElementById('pegawai');
     const gajiPokokInput = document.getElementById('gaji_pokok');
 

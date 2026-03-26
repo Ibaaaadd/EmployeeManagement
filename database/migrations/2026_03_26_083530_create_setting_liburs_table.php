@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
+        Schema::create('setting_liburs', function (Blueprint $table) {
+            $table->id();
+            $table->string('bulan', 7)->unique(); // Y-m
+            $table->string('tanggal_merah')->nullable(); // format "1,3,15"
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('setting_liburs');
     }
 };

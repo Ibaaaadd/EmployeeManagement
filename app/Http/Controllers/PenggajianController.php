@@ -23,37 +23,57 @@ class PenggajianController extends Controller
     {
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
-            'periode' => 'required|in:1,2',
             'bulan' => 'required|date_format:Y-m',
         ]);
 
         $pegawaiId = $request->pegawai_id;
-        $periode = $request->periode;
         $bulanTahun = $request->bulan;
 
-        if ($periode == '1') {
-            $startDate = "$bulanTahun-01";
-            $endDate = "$bulanTahun-15";
-        } else {
-            $startDate = "$bulanTahun-16";
-            $endDate = date("Y-m-t", strtotime($bulanTahun . '-01'));
+        $startDate = \Carbon\Carbon::parse("$bulanTahun-01");
+        $endDate = $startDate->copy()->endOfMonth();
+
+        $attendances = Absensi::where('pegawai_id', $pegawaiId)
+            ->whereDate('attendance_time', '>=', $startDate)
+            ->whereDate('attendance_time', '<=', $endDate)
+            ->get();
+
+        $jumlahIzin = 0;
+        $jumlahTidakHadir = 0;
+
+        $totalHariKerja = 0;
+        
+        $currentDate = $startDate->copy();
+        
+        while ($currentDate <= $endDate) {
+            if ($currentDate->isWeekday()) {
+                $totalHariKerja++;
+                $dateStr = $currentDate->format('Y-m-d');
+                $att = $attendances->first(function($item) use ($dateStr) {
+                    return \Carbon\Carbon::parse($item->attendance_time)->format('Y-m-d') === $dateStr;
+                });
+
+                if ($att) {
+                    if ($att->status == 'Izin') {
+                        $jumlahIzin++;
+                    } elseif ($att->status == 'Tidak Hadir') {
+                        $jumlahTidakHadir++;
+                    }
+                } else {
+                    // Kalau tidak absen pada hari kerja, terhitung Tidak Hadir
+                    $jumlahTidakHadir++;
+                }
+            }
+            $currentDate->addDay();
         }
 
-        $jumlahIzin = Absensi::where('pegawai_id', $pegawaiId)
-            ->where('status', 'Izin')
-            ->whereBetween('attendance_time', [$startDate, $endDate])
-            ->count();
-
-        $jumlahTidakHadir = Absensi::where('pegawai_id', $pegawaiId)
-            ->where('status', operator: 'Tidak Hadir')
-            ->whereBetween('attendance_time', [$startDate, $endDate])
-            ->count();
-
-        $potongan = ($jumlahIzin + $jumlahTidakHadir) * 30000;
+        $pegawai = Pegawai::findOrFail($pegawaiId);
+        $gajiPerHari = $totalHariKerja > 0 ? floor($pegawai->gaji / $totalHariKerja) : 0;
+        $potongan = ($jumlahIzin + $jumlahTidakHadir) * $gajiPerHari;
 
         return response()->json([
             'izin' => $jumlahIzin,
             'tidak_hadir' => $jumlahTidakHadir,
+            'gaji_per_hari' => $gajiPerHari,
             'potongan' => $potongan,
         ]);
     }
@@ -62,36 +82,80 @@ class PenggajianController extends Controller
     {
         $request->validate([
             'pegawai_id' => 'required|exists:pegawais,id',
-            'periode' => 'required|in:1,2',
             'bulan' => 'required|date_format:Y-m',
+            'tanggal_merah' => 'nullable|string',
         ]);
 
         $pegawai = Pegawai::findOrFail($request->pegawai_id);
-        $periode = $request->periode;
         $bulanTahun = $request->bulan;
+        $periode = '1 Bulan Full';
         $insentif = $request->insentif ?? 0;
-
-        if ($periode == '1') {
-            $startDate = "$bulanTahun-01";
-            $endDate = "$bulanTahun-15";
-        } else {
-            $startDate = "$bulanTahun-16";
-            $endDate = date("Y-m-t", strtotime($bulanTahun . '-01'));
+        
+        // Parse tanggal libur
+        $liburDates = [];
+        if (!empty($request->tanggal_merah)) {
+            $tanggals = explode(',', $request->tanggal_merah);
+            foreach ($tanggals as $t) {
+                $t = trim($t);
+                if (is_numeric($t) && $t > 0 && $t <= 31) {
+                    $liburDates[] = sprintf('%s-%02d', $bulanTahun, $t);
+                }
+            }
         }
 
-        $jumlahIzin = Absensi::where('pegawai_id', $pegawai->id)
-            ->where('status', 'Izin')
-            ->whereBetween('attendance_time', [$startDate, $endDate])
-            ->count();
+        $startDate = \Carbon\Carbon::parse("$bulanTahun-01");
+        $endDate = $startDate->copy()->endOfMonth();
 
-        $jumlahTidakHadir = Absensi::where('pegawai_id', $pegawai->id)
-            ->where('status', 'Tidak Hadir')
-            ->whereBetween('attendance_time', [$startDate, $endDate])
-            ->count();
+        $attendances = Absensi::where('pegawai_id', $pegawai->id)
+            ->whereDate('attendance_time', '>=', $startDate)
+            ->whereDate('attendance_time', '<=', $endDate)
+            ->get();
+
+        $jumlahIzin = 0;
+        $jumlahTidakHadir = 0;
+        $totalHariKerja = 0;
+        
+        // Hitung total hari kerja (Senin - Jumat) di luar tanggal merah
+        $tempDate = $startDate->copy();
+        while ($tempDate <= $endDate) {
+            if ($tempDate->isWeekday()) {
+                if (!in_array($tempDate->format('Y-m-d'), $liburDates)) {
+                    $totalHariKerja++;
+                }
+            }
+            $tempDate->addDay();
+        }
 
         $gajiPokok = $pegawai->gaji;
-        $insentif = $request->insentif;
-        $totalPengurangan = ($jumlahIzin + $jumlahTidakHadir) * 30000;
+        $gajiPerHari = $totalHariKerja > 0 ? floor($gajiPokok / $totalHariKerja) : 0;
+
+        $currentDate = $startDate->copy();
+        
+        while ($currentDate <= $endDate) {
+            // Evaluasi di hari kerja yang bukan tanggal merah
+            if ($currentDate->isWeekday()) {
+                $dateStr = $currentDate->format('Y-m-d');
+                if (!in_array($dateStr, $liburDates)) {
+                    $att = $attendances->first(function($item) use ($dateStr) {
+                        return \Carbon\Carbon::parse($item->attendance_time)->format('Y-m-d') === $dateStr;
+                    });
+
+                    if ($att) {
+                        if ($att->status == 'Izin') {
+                            $jumlahIzin++;
+                        } elseif ($att->status == 'Tidak Hadir') {
+                            $jumlahTidakHadir++;
+                        }
+                    } else {
+                        // Tidak ada record absen di hari kerja = Tidak Hadir
+                        $jumlahTidakHadir++;
+                    }
+                }
+            }
+            $currentDate->addDay();
+        }
+
+        $totalPengurangan = ($jumlahIzin + $jumlahTidakHadir) * $gajiPerHari;
         $totalGaji = $gajiPokok - $totalPengurangan + $insentif;
 
         RiwayatGaji::create([
@@ -102,6 +166,11 @@ class PenggajianController extends Controller
         'insentif' => $insentif,
         'potongan' => $totalPengurangan,
         'total_gaji' => $totalGaji,
+        'jumlah_izin' => $jumlahIzin,
+        'jumlah_tidak_hadir' => $jumlahTidakHadir,
+        'total_hari_kerja' => $totalHariKerja,
+        'gaji_per_hari' => $gajiPerHari,
+        'tanggal_merah' => $request->tanggal_merah,
         ]);
 
         $pegawaiList = Pegawai::all();
@@ -118,7 +187,9 @@ class PenggajianController extends Controller
         'totalPengurangan',
         'totalGaji',
         'bulanTahun',
-        'hasilHitung'
+        'hasilHitung',
+        'totalHariKerja',
+        'gajiPerHari'
     ))->with('pegawaiId', $request->pegawai_id);
 
     }
@@ -127,7 +198,6 @@ class PenggajianController extends Controller
     {
     $data = $request->validate([
         'pegawai_id' => 'required|exists:pegawais,id',
-        'periode' => 'required|in:1,2',
         'bulan' => 'required|date_format:Y-m',
         'gaji_pokok' => 'required|integer',
         'insentif' => 'required|integer',
@@ -135,8 +205,23 @@ class PenggajianController extends Controller
         'total_gaji' => 'required|integer',
     ]);
 
+    $data['periode'] = '1 Bulan Full';
+
     $pegawai = Pegawai::find($data['pegawai_id']);
-    $pdf = Pdf::loadView('slipgaji', compact('pegawai', 'data'));
+    // Menyiapkan data untuk pdf
+    $viewData = [
+        'pegawai' => $pegawai,
+        'periode' => $data['periode'],
+        'bulanTahun' => $data['bulan'],
+        'gajiPokok' => $data['gaji_pokok'],
+        'insentif' => $data['insentif'],
+        'jumlahIzin' => $request->jumlah_izin ?? 0,
+        'jumlahTidakHadir' => $request->jumlah_tidak_hadir ?? 0,
+        'gajiPerHari' => $request->gaji_per_hari ?? 30000,
+        'totalPengurangan' => $data['potongan'],
+        'totalGaji' => $data['total_gaji'],
+    ];
+    $pdf = Pdf::loadView('slip_pdf', $viewData);
 
     $pdfName = 'slipgaji_' . $pegawai->id . '_' . now()->format('YmHis') . '.pdf';
     Storage::put("public/slipgaji/$pdfName", $pdf->output());
@@ -181,9 +266,21 @@ class PenggajianController extends Controller
     {
     $riwayat = \App\Models\RiwayatGaji::with('pegawai')->findOrFail($id);
 
-    $pdf = Pdf::loadView('slipgaji', compact('riwayat'));
+    $viewData = [
+        'pegawai' => $riwayat->pegawai,
+        'periode' => $riwayat->periode,
+        'bulanTahun' => $riwayat->tanggal,
+        'gajiPokok' => $riwayat->gaji_pokok,
+        'insentif' => $riwayat->insentif,
+        'jumlahIzin' => $riwayat->jumlah_izin ?? 0,
+        'jumlahTidakHadir' => $riwayat->jumlah_tidak_hadir ?? 0,
+        'gajiPerHari' => $riwayat->gaji_per_hari ?? 30000,
+        'totalPengurangan' => $riwayat->potongan ?? 0,
+        'totalGaji' => $riwayat->total_gaji,
+    ];
+    $pdf = Pdf::loadView('slip_pdf', $viewData);
 
-    return $pdf->download('SlipGaji_'.$riwayat->pegawai->nama.'_'.date('F_Y', strtotime($riwayat->tanggal)).'.pdf');
+    return $pdf->download('SlipGaji_'.$riwayat->pegawai->name.'_'.date('F_Y', strtotime($riwayat->tanggal)).'.pdf');
     }
 
     public function downloadSlip(Request $request)
@@ -192,12 +289,13 @@ class PenggajianController extends Controller
 
     $data = [
         'pegawai' => $pegawai,
-        'periode' => $request->periode,
+        'periode' => '1 Bulan Full',
         'bulanTahun' => $request->bulan,
         'gajiPokok' => $request->gaji_pokok,
         'insentif' => $request->insentif,
         'jumlahIzin' => (int)($request->jumlah_izin ?? 0),
-        'jumlahTidakHadir' => (int)($request->jumlah_Tidak_Hadir ?? 0),
+        'jumlahTidakHadir' => (int)($request->jumlah_tidak_hadir ?? 0),
+        'gajiPerHari' => (int)($request->gaji_per_hari ?? 30000),
         'totalPengurangan' => $request->potongan,
         'totalGaji' => $request->total_gaji,
     ];
@@ -216,15 +314,16 @@ class PenggajianController extends Controller
         'bulanTahun' => $riwayat->tanggal,
         'gajiPokok' => $riwayat->gaji_pokok,
         'insentif' => $riwayat->insentif,
-        'jumlahIzin' => $riwayat->jumlah_izin,
-        'jumlahTidakHadir' => (int)($request->jumlah_Tidak_Hadir ?? 0),
-        'totalPengurangan' => $riwayat->total_pengurangan,
+        'jumlahIzin' => $riwayat->jumlah_izin ?? 0,
+        'jumlahTidakHadir' => $riwayat->jumlah_tidak_hadir ?? 0,
+        'gajiPerHari' => $riwayat->gaji_per_hari ?? 0,
+        'totalPengurangan' => $riwayat->potongan,
         'totalGaji' => $riwayat->total_gaji,
     ];
 
     $pdf = Pdf::loadView('slip_pdf', $data);
 
-    return $pdf->download('SlipGaji_' . $riwayat->pegawai->name . '_' . \Carbon\Carbon::parse($riwayat->tanggal_gaji)->format('Ym') . '.pdf');
+    return $pdf->download('SlipGaji_' . $riwayat->pegawai->name . '_' . \Carbon\Carbon::parse($riwayat->tanggal)->format('Ym') . '.pdf');
     }
     public function previewSlip($id)
     {
@@ -238,6 +337,7 @@ class PenggajianController extends Controller
         'insentif' => $riwayat->insentif,
         'jumlahIzin' => $riwayat->jumlah_izin ?? 0,
         'jumlahTidakHadir' => $riwayat->jumlah_tidak_hadir ?? 0,
+        'gajiPerHari' => $riwayat->gaji_per_hari ?? 0,
         'totalPengurangan' => $riwayat->potongan ?? 0,
         'totalGaji' => $riwayat->total_gaji,
     ]);
