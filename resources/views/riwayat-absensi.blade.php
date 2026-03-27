@@ -77,7 +77,7 @@
                                 <table class="table table-hover align-middle">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th>Jam</th>
+                                            <th>Jam Masuk</th><th>Jam Pulang</th>
                                             <th>Tanggal</th>
                                             <th>Nama Pegawai</th>
                                             <th>Status</th>
@@ -89,14 +89,24 @@
                                             <tr>
                                                 <td>
                                                     <span class="badge bg-secondary bg-opacity-10 text-dark border rounded-pill">
-                                                        <i class="fa-regular fa-clock me-1"></i> {{ \Carbon\Carbon::parse($absensi->attendance_time)->format('H:i') }}
+                                                        <i class="fa-regular fa-clock me-1"></i> {{ $absensi->jam_masuk ? \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') : '-' }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-secondary bg-opacity-10 text-dark border rounded-pill">
+                                                        <i class="fa-regular fa-clock me-1"></i> {{ $absensi->jam_pulang ? \Carbon\Carbon::parse($absensi->jam_pulang)->format('H:i') : '-' }}
                                                     </span>
                                                 </td>
                                                 <td>{{ \Carbon\Carbon::parse($absensi->attendance_time)->format('d-m-Y') }}</td>
                                                 <td class="fw-medium text-dark">{{ $absensi->pegawai->name }}</td>
                                                 <td>
                                                     @if($absensi->status === 'Hadir')
-                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2"><i class="fa-solid fa-check-circle me-1"></i> Hadir</span>
+                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2">
+                                                            <i class="fa-solid fa-check-circle me-1"></i> Hadir
+                                                            @if($absensi->is_late)
+                                                                <span class="text-danger fw-bold ms-1">(Telat)</span>
+                                                            @endif
+                                                        </span>
                                                     @elseif($absensi->status === 'Izin')
                                                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-2"><i class="fa-solid fa-envelope-open-text me-1"></i> Izin</span>
                                                     @else

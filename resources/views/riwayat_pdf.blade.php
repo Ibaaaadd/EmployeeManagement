@@ -77,7 +77,8 @@
     <table>
         <thead>
             <tr>
-                <th>Jam</th>
+                <th>Jam Masuk</th>
+                <th>Jam Pulang</th>
                 <th>Tanggal</th>
                 <th>Nama Pegawai</th>
                 <th>Status Kehadiran</th>
@@ -86,10 +87,16 @@
         <tbody>
             @foreach ($absensis as $absensi)
                 <tr>
-                    <td>{{ \Carbon\Carbon::parse($absensi->attendance_time)->format('H:i') }}</td>
+                    <td>{{ $absensi->jam_masuk ? \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') : '-' }}</td>
+                    <td>{{ $absensi->jam_pulang ? \Carbon\Carbon::parse($absensi->jam_pulang)->format('H:i') : '-' }}</td>
                     <td>{{ \Carbon\Carbon::parse($absensi->attendance_time)->format('d-m-Y') }}</td>
                     <td>{{ $absensi->pegawai->name }}</td>
-                    <td>{{ $absensi->status }}</td>
+                    <td>
+                        {{ $absensi->status }}
+                        @if($absensi->status == 'Hadir' && $absensi->is_late)
+                            (Telat)
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>

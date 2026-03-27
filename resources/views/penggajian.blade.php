@@ -22,6 +22,29 @@
                     @csrf
 
                     <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="bulan" class="form-label fw-bold text-secondary small text-uppercase">Bulan & Tahun</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-days text-muted"></i></span>
+                                <input type="month" id="bulan" name="bulan" class="form-control border-start-0 ps-0 @error('bulan') is-invalid @enderror" value="{{ old('bulan', now()->format('Y-m')) }}" required>
+                            </div>
+                            @error('bulan')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="tanggal_merah" class="form-label fw-bold text-secondary small text-uppercase">Tanggal Merah</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-xmark text-muted"></i></span>
+                                <input type="text" id="tanggal_merah" name="tanggal_merah" class="form-control border-start-0 ps-0 @error('tanggal_merah') is-invalid @enderror" value="{{ old('tanggal_merah') }}" placeholder="Contoh: 1, 17, 25">
+                            </div>
+                            <div class="text-muted small mt-1">Masukkan tanggal libur otomatis disimpan per bulan.</div>
+                            @error('tanggal_merah')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="col-md-12">
                             <label for="pegawai" class="form-label fw-bold text-secondary small text-uppercase">Pilih Pegawai</label>
                             <div class="input-group">
@@ -57,39 +80,14 @@
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
-                        
-                        <div class="col-md-6">
-                            <label for="bulan" class="form-label fw-bold text-secondary small text-uppercase">Bulan & Tahun</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-days text-muted"></i></span>
-                                <input type="month" id="bulan" name="bulan" class="form-control border-start-0 ps-0 @error('bulan') is-invalid @enderror" value="{{ old('bulan') }}" required>
-                            </div>
-                            @error('bulan')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="tanggal_merah" class="form-label fw-bold text-secondary small text-uppercase">Tanggal Merah (Opsional)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-xmark text-muted"></i></span>
-                                <input type="text" id="tanggal_merah" name="tanggal_merah" class="form-control border-start-0 ps-0 @error('tanggal_merah') is-invalid @enderror" value="{{ old('tanggal_merah') }}" placeholder="Contoh: 1, 17, 25">
-                            </div>
-                            <div class="text-muted small mt-1">*Masukkan tanggal yang merupakan hari libur (selain Sabtu & Minggu), pisahkan dengan koma.</div>
-                            @error('tanggal_merah')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+                    </div> <!-- End Row -->
 
                     <div class="mt-5 text-end">
-                        <button type="submit" class="btn btn-success rounded-pill px-5 py-2 shadow-sm d-inline-flex align-items-center">
-                            <i class="fa-solid fa-money-check-dollar me-2"></i> Hitung Gaji
+                        <button type="submit" class="btn btn-success px-5 py-3 fw-bold" style="border-radius: 12px; font-size: 1rem; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);">
+                            <i class="fa-solid fa-calculator me-2"></i> Hitung Gaji
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
 
         {{-- Note: Output / Hasil Perhitungan Biasanya di-render di bawah sini atau via modal / halaman baru (tergantung implementasi backend) --}}
         @if(isset($hasilHitung) || session('hasil'))
@@ -183,6 +181,54 @@ document.addEventListener('DOMContentLoaded', function() {
     // Trigger change on load if an option is already selected
     if(pegawaiSelect.value) {
         pegawaiSelect.dispatchEvent(new Event('change'));
+    }
+
+    const bulanInput = document.getElementById('bulan');
+    const tanggalMerahInput = document.getElementById('tanggal_merah');
+
+    async function fetchTanggalMerah() {
+        const bulan = bulanInput.value;
+        if (!bulan) return;
+        try {
+            const response = await fetch(`/api/setting-libur?bulan=${bulan}`);
+            const data = await response.json();
+            if (data && data.tanggal_merah !== null && data.tanggal_merah !== undefined) {
+                tanggalMerahInput.value = data.tanggal_merah;
+            } else {
+                tanggalMerahInput.value = '';
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+
+    async function saveTanggalMerah() {
+        const bulan = bulanInput.value;
+        const tanggal_merah = tanggalMerahInput.value;
+        if (!bulan) return;
+        
+        let csrfMeta = document.querySelector('meta[name="csrf-token"]');
+        let token = csrfMeta ? csrfMeta.content : '';
+
+        try {
+            await fetch('/api/setting-libur', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token
+                },
+                body: JSON.stringify({ bulan, tanggal_merah })
+            });
+        } catch (error) {
+            console.error('Error saving data:', error);
+        }
+    }
+
+    if(bulanInput && tanggalMerahInput) {
+        bulanInput.addEventListener('change', fetchTanggalMerah);
+        tanggalMerahInput.addEventListener('change', saveTanggalMerah);
+        // fetch on load
+        fetchTanggalMerah();
     }
 
     document.getElementById('formPenggajian').addEventListener('submit', function(e) {

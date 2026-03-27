@@ -25,14 +25,41 @@ class AbsensiSeeder extends Seeder
             while ($currentDate <= $endDate) {
                 if ($currentDate->isWeekday()) {
                     $status = $faker->randomElement(['Hadir', 'Hadir', 'Hadir', 'Hadir', 'Izin', 'Tidak Hadir']);
-                    $timestamp = $currentDate->copy()->setTime(random_int(7, 9), random_int(0, 59), 0);
                     
+                    $jamMasukHour = random_int(7, 9);
+                    $jamMasukMin = random_int(0, 59);
+                    $timestamp = $currentDate->copy()->setTime(8, 0, 0); // Default attendance_time bisa diset ke jam awal masuk
+                    
+                    $jamMasukStr = null;
+                    $jamPulangStr = null;
+                    $isLate = false;
+                    $attendancePhoto = null;
+                    $attendancePhotoPulang = null;
+
+                    if ($status === 'Hadir') {
+                        $jamMasukStr = sprintf('%02d:%02d:00', $jamMasukHour, $jamMasukMin);
+                        $jamPulangHour = random_int(16, 18);
+                        $jamPulangMin = random_int(0, 59);
+                        $jamPulangStr = sprintf('%02d:%02d:00', $jamPulangHour, $jamPulangMin);
+                        $attendancePhoto = 'foto_dummy.jpg';
+                        $attendancePhotoPulang = 'foto_dummy_pulang.jpg';
+                        
+                        // Cek telat (> 08:00)
+                        if ($jamMasukHour > 8 || ($jamMasukHour === 8 && $jamMasukMin > 0)) {
+                            $isLate = true;
+                        }
+                    }
+
                     $data[] = [
                         'pegawai_id' => $pegawai->id,
                         'pegawai_name' => $pegawai->name,
                         'status' => $status,
-                        'attendance_photo' => $status === 'Hadir' ? 'foto_dummy.jpg' : null,
+                        'attendance_photo' => $attendancePhoto,
+                        'attendance_photo_pulang' => $attendancePhotoPulang,
                         'attendance_time' => $timestamp,
+                        'jam_masuk' => $jamMasukStr,
+                        'jam_pulang' => $jamPulangStr,
+                        'is_late' => $isLate,
                         'created_at' => $timestamp,
                         'updated_at' => $timestamp,
                     ];
