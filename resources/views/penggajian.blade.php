@@ -1,249 +1,57 @@
 @extends('layouts.app')
 
+@section('title', 'Data Penggajian Pegawai')
+
 @section('content')
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4 animate__animated animate__fadeInDown">
             <h2 style="border-left: 5px solid var(--accent-color); padding-left: 15px; font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--primary-color);">
-                Proses Penggajian
+                Data Penggajian Pegawai
             </h2>
         </div>
 
         <div class="card border-0 shadow-sm animate__animated animate__fadeInUp" style="border-radius: 20px;">
-            <div class="card-header bg-white py-4 d-flex align-items-center" style="border-radius: 20px 20px 0 0; border-bottom: 2px solid #f1f5f9;">
-                <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
-                    <i class="fa-solid fa-calculator text-success fs-5"></i>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Nama Pegawai</th>
+                                <th>Jabatan</th>
+                                <th>Gaji Pokok / Bulan</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($pegawais as $index => $pegawai)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td class="fw-bold text-dark">{{ $pegawai->name }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary text-white rounded-pill px-3 py-2">
+                                            {{ $pegawai->jabatan }}
+                                        </span>
+                                    </td>
+                                    <td class="text-success fw-bold">Rp {{ number_format($pegawai->gaji, 0, ',', '.') }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ route('gaji.show', $pegawai->id) }}" class="btn btn-sm btn-primary rounded-pill px-4 shadow-sm">
+                                            <i class="fa-solid fa-file-invoice-dollar me-2"></i>Lihat Rekap Gaji
+                                        </a>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">Belum ada data pegawai.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
-                <h5 class="mb-0 text-dark fw-bold">Hitung Gaji Pegawai</h5>
             </div>
-
-            <div class="card-body p-4 p-md-5">
-                <form action="{{ route('gaji.hitung') }}" method="POST" id="formPenggajian">
-                    @csrf
-
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <label for="bulan" class="form-label fw-bold text-secondary small text-uppercase">Bulan & Tahun</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-days text-muted"></i></span>
-                                <input type="month" id="bulan" name="bulan" class="form-control border-start-0 ps-0 @error('bulan') is-invalid @enderror" value="{{ old('bulan', now()->format('Y-m')) }}" required>
-                            </div>
-                            @error('bulan')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-6">
-                            <label for="tanggal_merah" class="form-label fw-bold text-secondary small text-uppercase">Tanggal Merah</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-calendar-xmark text-muted"></i></span>
-                                <input type="text" id="tanggal_merah" name="tanggal_merah" class="form-control border-start-0 ps-0 @error('tanggal_merah') is-invalid @enderror" value="{{ old('tanggal_merah') }}" placeholder="Contoh: 1, 17, 25">
-                            </div>
-                            <div class="text-muted small mt-1">Masukkan tanggal libur otomatis disimpan per bulan.</div>
-                            @error('tanggal_merah')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="col-md-12">
-                            <label for="pegawai" class="form-label fw-bold text-secondary small text-uppercase">Pilih Pegawai</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-user-tie text-muted"></i></span>
-                                <select id="pegawai" name="pegawai_id" class="form-select border-start-0 ps-0 select-search" required>
-                                    <option value="" disabled selected>-- Pilih Pegawai --</option>
-                                    @foreach($pegawaiList as $pegawaiItem)
-                                        <option value="{{ $pegawaiItem->id }}" 
-                                                data-gaji="{{ $pegawaiItem->gaji }}" 
-                                                {{ isset($pegawaiId) && $pegawaiId == $pegawaiItem->id ? 'selected' : '' }}>
-                                            {{ $pegawaiItem->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <label for="gaji_pokok" class="form-label fw-bold text-secondary small text-uppercase">Gaji Pokok</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0 fw-bold">Rp</span>
-                                <input type="text" id="gaji_pokok" class="form-control border-start-0 ps-0 bg-light" readonly>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <label for="insentif" class="form-label fw-bold text-secondary small text-uppercase">Insentif / Bonus (Opsional)</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-money-bill-trend-up text-muted"></i></span>
-                                <input type="number" id="insentif" name="insentif" class="form-control border-start-0 ps-0 @error('insentif') is-invalid @enderror" value="{{ old('insentif', 0) }}" min="0">
-                            </div>
-                             @error('insentif')
-                                <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div> <!-- End Row -->
-
-                    <div class="mt-5 text-end">
-                        <button type="submit" class="btn btn-success px-5 py-3 fw-bold" style="border-radius: 12px; font-size: 1rem; box-shadow: 0 4px 6px rgba(40, 167, 69, 0.2);">
-                            <i class="fa-solid fa-calculator me-2"></i> Hitung Gaji
-                        </button>
-                    </div>
-                </form>
-
-        {{-- Note: Output / Hasil Perhitungan Biasanya di-render di bawah sini atau via modal / halaman baru (tergantung implementasi backend) --}}
-        @if(isset($hasilHitung) || session('hasil'))
-             <div class="alert alert-info mt-4 animate__animated animate__fadeInUp">Sistem telah memproses gaji. Silahkan cek Histori Gaji.</div>
-        @endif
+        </div>
     </div>
 </div>
-
-<style>
-.ts-control {
-    border-radius: 12px;
-    padding: 12px 15px;
-    border: 1px solid #dee2e6;
-    background-color: #fff;
-    box-shadow: none;
-    border-bottom-left-radius: 0;
-    border-top-left-radius: 0;
-}
-.ts-control.focus {
-    background-color: #fff;
-    border-color: var(--success-color);
-    box-shadow: none;
-}
-.input-group.ts-wrapper {
-    display: flex;
-}
-.input-group > .ts-wrapper {
-    flex: 1 1 auto;
-    width: 1%;
-}
-.form-control:focus, .form-select:focus {
-    box-shadow: none;
-    border-color: #dee2e6;
-}
-.input-group:focus-within .input-group-text, .input-group:focus-within  {
-    border-color: var(--success-color);
-}
-.input-group .form-control, .input-group .form-select, .input-group .input-group-text {
-    border-radius: 12px;
-    padding: 12px 15px;
-}
-.input-group-text {
-    background-color: #f8fafc;
-}
-input[readonly] { cursor: not-allowed; }
-</style>
-
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.select-search').forEach((el) => {
-        new TomSelect(el, {
-            create: false,
-            sortField: { field: "text", direction: "asc" }
-        });
-    });
-
-    const pegawaiSelect = document.getElementById('pegawai');
-    const gajiPokokInput = document.getElementById('gaji_pokok');
-
-    function formatRupiahJs(angka, prefix){
-        var number_string = angka.replace(/[^,\d]/g, '').toString(),
-        split   = number_string.split(','),
-        sisa     = split[0].length % 3,
-        rupiah     = split[0].substr(0, sisa),
-        ribuan     = split[0].substr(sisa).match(/\d{3}/gi);
-
-        if(ribuan){
-            separator = sisa ? '.' : '';
-            rupiah += separator + ribuan.join('.');
-        }
-
-        rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-        return prefix == undefined ? rupiah : (rupiah ? rupiah : '');
-    }
-
-    pegawaiSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const gaji = selectedOption.getAttribute('data-gaji');
-
-        if(gaji) {
-            // Remove existing dots before re-formatting (just in case)
-            let cleanGaji = gaji.replace(/\./g, '');
-            gajiPokokInput.value = formatRupiahJs(cleanGaji, '');
-        } else {
-            gajiPokokInput.value = '';
-        }
-    });
-
-    // Trigger change on load if an option is already selected
-    if(pegawaiSelect.value) {
-        pegawaiSelect.dispatchEvent(new Event('change'));
-    }
-
-    const bulanInput = document.getElementById('bulan');
-    const tanggalMerahInput = document.getElementById('tanggal_merah');
-
-    async function fetchTanggalMerah() {
-        const bulan = bulanInput.value;
-        if (!bulan) return;
-        try {
-            const response = await fetch(`/api/setting-libur?bulan=${bulan}`);
-            const data = await response.json();
-            if (data && data.tanggal_merah !== null && data.tanggal_merah !== undefined) {
-                tanggalMerahInput.value = data.tanggal_merah;
-            } else {
-                tanggalMerahInput.value = '';
-            }
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        }
-    }
-
-    async function saveTanggalMerah() {
-        const bulan = bulanInput.value;
-        const tanggal_merah = tanggalMerahInput.value;
-        if (!bulan) return;
-        
-        let csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        let token = csrfMeta ? csrfMeta.content : '';
-
-        try {
-            await fetch('/api/setting-libur', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token
-                },
-                body: JSON.stringify({ bulan, tanggal_merah })
-            });
-        } catch (error) {
-            console.error('Error saving data:', error);
-        }
-    }
-
-    if(bulanInput && tanggalMerahInput) {
-        bulanInput.addEventListener('change', fetchTanggalMerah);
-        tanggalMerahInput.addEventListener('change', saveTanggalMerah);
-        // fetch on load
-        fetchTanggalMerah();
-    }
-
-    document.getElementById('formPenggajian').addEventListener('submit', function(e) {
-        if(this.checkValidity()) {
-            Swal.fire({
-                title: 'Menghitung Penggajian...',
-                html: 'Tunggu sebentar, sedang memproses data kehadiran',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-        }
-    });
-});
-</script>
 @endsection
 

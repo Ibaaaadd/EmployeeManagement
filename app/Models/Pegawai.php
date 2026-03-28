@@ -18,6 +18,11 @@ class Pegawai extends Model
         return $this->hasMany(Absensi::class);
     }
 
+    public function riwayat_gajis()
+    {
+        return $this->hasMany(RiwayatGaji::class);
+    }
+
     public function user()
     {
         return $this->hasOne(User::class);

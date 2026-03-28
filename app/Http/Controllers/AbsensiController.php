@@ -107,6 +107,9 @@ class AbsensiController extends Controller
             $absensi->save();
         }
 
+        // Otomatis update/create history gaji untuk bulan ini
+        app(PenggajianController::class)->updateGajiBulan($pegawai->id, \Carbon\Carbon::parse($request->attendance_time));
+
         return redirect()->route('absensi.index')->with('success', 'Absensi berhasil dilakukan!');
     }
 
@@ -120,11 +123,10 @@ class AbsensiController extends Controller
         });
     }
 
-    if ($request->filled('bulan')) {
-        $tanggal = \Carbon\Carbon::parse($request->bulan);
+    $bulan = $request->input('bulan', \Carbon\Carbon::now()->format('Y-m'));
+        $tanggal = \Carbon\Carbon::parse($bulan);
         $query->whereMonth('attendance_time', $tanggal->month)
               ->whereYear('attendance_time', $tanggal->year);
-    }
 
     $query->orderBy('attendance_time', 'desc');
     $semuaAbsensi = $query->get();
@@ -172,8 +174,7 @@ class AbsensiController extends Controller
 
     return view('riwayat-absensi', compact('absensis', 'rekapPegawai', 'pegawaiList'));
 }
-
-    public function downloadPDF(Request $request)
+ public function downloadPDF(Request $request)
 {
     $query = Absensi::with('pegawai');
 
@@ -183,18 +184,17 @@ class AbsensiController extends Controller
         });
     }
 
-    if ($request->filled('bulan')) {
-        $tanggal = Carbon::parse($request->bulan);
+    $bulan = $request->input('bulan', \Carbon\Carbon::now()->format('Y-m'));
+        $tanggal = \Carbon\Carbon::parse($bulan);
         $query->whereMonth('attendance_time', $tanggal->month)
               ->whereYear('attendance_time', $tanggal->year);
-    }
 
     $absensis = $query->orderBy('attendance_time', 'desc')->get();
 
     $pdf = Pdf::loadView('riwayat_pdf', [
         'absensis' => $absensis,
         'nama' => $request->nama,
-        'bulan' => $request->bulan,
+          'bulan' => $bulan,
     ]);
 
     return $pdf->download('Riwayat_Absensi.pdf');

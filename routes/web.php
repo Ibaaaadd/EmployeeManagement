@@ -31,8 +31,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/absensi', [AbsensiController::class, 'create'])->name('absensi.index');
     Route::get('/api/pegawai-belum-digaji', [PenggajianController::class, 'getPegawaiBelumDigaji'])->name('api.pegawai.belumdigaji');
     Route::get('/penggajian', [PenggajianController::class, 'index'])->name('gaji.index');
+    Route::get('/penggajian/{id}', [PenggajianController::class, 'show'])->name('gaji.show');
     Route::get('/riwayat-gaji', [PenggajianController::class, 'riwayat'])->name('gaji.riwayat');
     Route::get('/riwayat/{id}/preview', [PenggajianController::class, 'previewSlip'])->name('riwayat.preview');
+    Route::delete('/riwayat-gaji/{id}', [PenggajianController::class, 'destroyRiwayat'])->name('riwayat.destroy');
     Route::get('/riwayat-gaji/download/{id}', [PenggajianController::class, 'downloadFromRiwayat'])->name('riwayat.download');
     Route::get('/riwayat-absensi', [AbsensiController::class, 'riwayat'])->name('absensi.riwayat');
     Route::get('/riwayat-absensi/download', [AbsensiController::class, 'downloadPdf'])->name('absensi.riwayat.download');    // Tambahkan route lain yang ingin kamu proteksi
@@ -57,11 +59,10 @@ Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index
 Route::post('/absensi', [AbsensiController::class, 'store'])->name('absensi.store'); // Menyimpan data absensi
 
 Route::get('/penggajian', [PenggajianController::class, 'index'])->name('gaji.index');
-Route::post('/penggajian/hitung', [PenggajianController::class, 'hitungGaji'])->name('gaji.hitung');
-Route::get('/api/absensi', [PenggajianController::class, 'getAbsensiByPegawai'])->name('api.absensi');
+Route::get('/penggajian/{id}', [PenggajianController::class, 'show'])->name('gaji.show');
 
 Route::get('/riwayat-gaji', [PenggajianController::class, 'riwayat'])->name('gaji.riwayat');
-Route::post('/penggajian/selesai', [PenggajianController::class, 'selesaikanPenggajian'])->name('penggajian.selesai');
+
 Route::get('/slipgaji/{id}', [PenggajianController::class, 'generateSlipGaji'])->name('slipgaji.pdf');
 
 Route::post('/slip-gaji/download', [PenggajianController::class, 'downloadSlip'])->name('slipgaji.download');
