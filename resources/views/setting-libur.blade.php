@@ -84,7 +84,7 @@
             </div>
         </div>
 
-        <!-- Tabel Data Tanggal Merah -->
+        <!-- Data Tanggal Merah - Modern Cards -->
         <div class="card border-0 shadow-sm animate__animated animate__fadeInUp" style="border-radius: 20px;">
             <div class="card-header bg-white py-4" style="border-radius: 20px 20px 0 0; border-bottom: 2px solid #f1f5f9;">
                 <h5 class="mb-0 text-dark fw-bold">
@@ -99,70 +99,88 @@
                         <p class="mb-0 text-muted">Silakan tambahkan tanggal merah menggunakan form di atas</p>
                     </div>
                 @else
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th width="5%" class="ps-4">No</th>
-                                    <th width="20%">Bulan</th>
-                                    <th width="50%">Tanggal Merah</th>
-                                    <th width="25%" class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($holidays as $index => $holiday)
-                                    <tr>
-                                        <td class="ps-4 fw-bold">{{ $index + 1 }}</td>
-                                        <td>
+                    <div class="row g-3">
+                        @foreach($holidays as $index => $holiday)
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="card border-0 shadow-sm h-100 hover-lift" style="border-radius: 15px; transition: all 0.3s ease;">
+                                    <!-- Card Header with Month -->
+                                    <div class="card-header text-white py-3" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 15px 15px 0 0; border: none;">
+                                        <div class="d-flex align-items-center justify-content-between">
                                             <div class="d-flex align-items-center">
-                                                <div class="bg-info bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                                     style="width: 40px; height: 40px;">
-                                                    <i class="fa-regular fa-calendar text-info"></i>
+                                                <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                                     style="width: 45px; height: 45px;">
+                                                    <i class="fa-regular fa-calendar fs-5"></i>
                                                 </div>
                                                 <div>
-                                                    <strong class="text-dark">{{ \Carbon\Carbon::parse($holiday->bulan . '-01')->locale('id')->isoFormat('MMMM YYYY') }}</strong>
-                                                    <div class="text-muted small">{{ $holiday->bulan }}</div>
+                                                    <h6 class="mb-0 fw-bold">{{ \Carbon\Carbon::parse($holiday->bulan . '-01')->locale('id')->isoFormat('MMMM YYYY') }}</h6>
+                                                    <small class="opacity-75">{{ $holiday->bulan }}</small>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <td>
+                                            <span class="badge bg-white text-primary fw-bold px-3 py-2">
+                                                #{{ $index + 1 }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card Body with Holidays -->
+                                    <div class="card-body p-4">
+                                        <div class="mb-3">
+                                            <label class="text-muted small text-uppercase fw-semibold mb-2">
+                                                <i class="fas fa-calendar-times me-1"></i> Tanggal Libur Nasional
+                                            </label>
                                             @if($holiday->tanggal_merah)
                                                 @php
                                                     $dates = explode(',', $holiday->tanggal_merah);
                                                 @endphp
                                                 <div class="d-flex flex-wrap gap-2">
                                                     @foreach($dates as $date)
-                                                        <span class="badge bg-danger rounded-pill px-3 py-2">
-                                                            <i class="fas fa-calendar-times me-1"></i>{{ trim($date) }}
+                                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 fw-semibold">
+                                                            <i class="fas fa-calendar-day me-1"></i>{{ trim($date) }}
                                                         </span>
                                                     @endforeach
                                                 </div>
+                                                <div class="mt-3 pt-3 border-top">
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                                        <strong>{{ count($dates) }} hari</strong> libur nasional
+                                                    </small>
+                                                </div>
                                             @else
-                                                <span class="text-muted fst-italic">
-                                                    <i class="fas fa-info-circle me-1"></i>Tidak ada libur
-                                                </span>
+                                                <div class="alert alert-light border-0 mb-0 py-3" style="background-color: #f8fafc;">
+                                                    <div class="text-center">
+                                                        <i class="fas fa-calendar-check fs-4 text-success mb-2 d-block"></i>
+                                                        <span class="text-muted small">Tidak ada libur nasional</span>
+                                                    </div>
+                                                </div>
                                             @endif
-                                        </td>
-                                        <td class="text-center">
-                                            <div class="d-flex gap-2 justify-content-center">
-                                                <button class="btn btn-sm btn-warning rounded-pill px-3 shadow-sm" 
-                                                        onclick="editHoliday('{{ $holiday->bulan }}', '{{ $holiday->tanggal_merah }}')"
-                                                        title="Edit">
-                                                    <i class="fas fa-edit me-1"></i> Edit
+                                        </div>
+                                    </div>
+
+                                    <!-- Card Footer with Actions -->
+                                    <div class="card-footer bg-light border-0 py-3" style="border-radius: 0 0 15px 15px;">
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <button class="btn btn-sm btn-warning rounded-pill px-4 shadow-sm flex-fill" 
+                                                    onclick="editHoliday('{{ $holiday->bulan }}', '{{ $holiday->tanggal_merah }}')"
+                                                    style="transition: all 0.3s ease;"
+                                                    onmouseover="this.style.transform='translateY(-2px)'"
+                                                    onmouseout="this.style.transform='translateY(0)'">
+                                                <i class="fas fa-edit me-1"></i> Edit
+                                            </button>
+                                            <form action="{{ route('setting-libur.destroy', $holiday->bulan) }}" method="POST" class="form-delete flex-fill">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-danger rounded-pill px-4 shadow-sm w-100"
+                                                        style="transition: all 0.3s ease;"
+                                                        onmouseover="this.style.transform='translateY(-2px)'"
+                                                        onmouseout="this.style.transform='translateY(0)'">
+                                                    <i class="fas fa-trash me-1"></i> Hapus
                                                 </button>
-                                                <form action="{{ route('setting-libur.destroy', $holiday->bulan) }}" method="POST" class="d-inline form-delete">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm" title="Hapus">
-                                                        <i class="fas fa-trash me-1"></i> Hapus
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 @endif
             </div>

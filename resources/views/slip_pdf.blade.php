@@ -6,272 +6,356 @@
     <style>
         @page {
             size: A4;
-            margin: 10mm;
+            margin: 15mm;
         }
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            color: #1f2937;
+        * {
             margin: 0;
             padding: 0;
-            font-size: 14px;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            color: #1e293b;
+            background: #ffffff;
+            font-size: 13px;
+            line-height: 1.6;
         }
         .container {
             width: 100%;
-            padding: 10px;
+            padding: 0;
         }
+        
+        /* Modern Header */
         .header {
-            text-align: center;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 25px 30px;
+            border-radius: 12px;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
+            text-align: center;
         }
         .header h1 {
-            color: #1e3a8a;
-            font-size: 26px;
-            font-weight: bold;
-            margin: 0 0 5px 0;
-            letter-spacing: 1px;
-            text-transform: uppercase;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
         .header p {
-            margin: 3px 0;
-            color: #475569;
-            font-size: 14px;
+            font-size: 12px;
+            opacity: 0.95;
+            margin: 2px 0;
         }
-        .title-section {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .title-section h2 {
+        
+        /* Badge Title */
+        .title-badge {
             display: inline-block;
-            margin: 0;
-            font-size: 18px;
-            font-weight: bold;
-            color: #0f172a;
-            letter-spacing: 1.5px;
-            padding: 6px 20px;
-            background-color: #f8fafc;
-            border-radius: 5px;
-            border: 1px solid #e2e8f0;
-            text-transform: uppercase;
-        }
-        .info-grid {
-            width: 100%;
+            background: #f1f5f9;
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 16px;
+            padding: 10px 30px;
+            border-radius: 25px;
             margin-bottom: 20px;
-            background-color: #f8fafc;
-            padding: 10px 15px;
-            border: 1px solid #f1f5f9;
-            border-radius: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 2px solid #e2e8f0;
         }
-        .info-grid table {
-            width: 100%;
-            border: none;
-            margin: 0;
-            background-color: transparent;
-            box-shadow: none;
+        
+        /* Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
         }
-        .info-grid table td {
-            border: none;
-            padding: 4px 0;
-            font-size: 14px;
+        .info-card {
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
         }
-        .info-label {
-            font-weight: bold;
+        .info-card-label {
+            font-size: 11px;
             color: #64748b;
             text-transform: uppercase;
-            width: 100px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
         }
-        table.data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            border: 1px solid #e2e8f0;
-        }
-        .data-table th, .data-table td {
-            padding: 10px 15px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .data-table th {
-            background-color: #f8fafc;
-            font-weight: bold;
-            color: #475569;
-            text-align: left;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 1px;
-        }
-        .data-table td {
-            font-size: 14px;
-            color: #334155;
-        }
-        .amount {
-            text-align: right;
-        }
-        .section-title td {
-            background-color: #f1f5f9;
-            font-weight: bold;
+        .info-card-value {
+            font-size: 16px;
             color: #0f172a;
+            font-weight: 700;
+        }
+        
+        /* Section Cards */
+        .section-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        .section-header {
+            background: #f1f5f9;
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 10px 15px;
+            margin: -20px -20px 15px -20px;
+            border-radius: 10px 10px 0 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Item Rows */
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .item-row:last-child {
+            border-bottom: none;
+        }
+        .item-label {
+            color: #475569;
             font-size: 13px;
         }
-        .subtotal-row td {
-            font-weight: bold;
+        .item-value {
             color: #0f172a;
-            background-color: #f8fafc;
+            font-weight: 600;
+            font-size: 13px;
         }
-        .grand-total td {
-            background-color: #1e3a8a !important;
-            color: #ffffff !important;
-            font-weight: bold !important;
-            font-size: 16px;
-            padding: 15px;
-        }
-        /* PDF specific override for background colors */
-        .header h1 { color: #1e3a8a; }
-        .data-table th { background-color: #f8fafc !important; }
-        .section-title td { background-color: #f1f5f9 !important; }
-        .subtotal-row td { background-color: #f8fafc !important; }
-        .grand-total td { background-color: #1e3a8a !important; color: #ffffff !important; }
         
-        .footer {
-            width: 100%;
+        /* Badge Pills */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        .badge-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .badge-success {
+            background: #d1fae5;
+            color: #047857;
+        }
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Subtotal */
+        .subtotal-row {
+            background: #f8fafc;
+            padding: 12px 15px;
+            margin: 10px -20px -10px -20px;
+            border-radius: 0 0 10px 10px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        /* Grand Total Card */
+        .grand-total-card {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .grand-total-label {
+            font-size: 13px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .grand-total-value {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #10b981;
+            font-style: italic;
+            background: #d1fae5;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        
+        /* Signature */
+        .signature-section {
             margin-top: 40px;
+            text-align: right;
         }
         .signature-box {
-            float: right;
+            display: inline-block;
             text-align: center;
             width: 250px;
         }
         .signature-date {
-            margin-bottom: 6px;
+            font-size: 12px;
             color: #64748b;
-            font-size: 14px;
+            margin-bottom: 8px;
         }
         .signature-title {
-            font-weight: bold;
-            margin-bottom: 80px;
-            color: #0f172a;
-        }
-        .signature-line {
-            border-top: 1px solid #0f172a;
-            margin-top: 8px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 70px;
         }
         .signature-name {
-            font-weight: bold;
+            font-weight: 700;
             color: #0f172a;
             font-size: 14px;
-        }
-        .clear {
-            clear: both;
+            padding-top: 10px;
+            border-top: 2px solid #1e40af;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Modern Header -->
         <div class="header">
             <h1>PT. JAYA ABADI</h1>
             <p>Jl. Jend Sudirman No.41/49 A Palembang</p>
             <p>Telp (0711) 313414 / 310562 &bull; Fax (0711) 312226</p>
         </div>
 
-        <div class="title-section">
-            <h2>SLIP GAJI PEGAWAI</h2>
+        <!-- Title Badge -->
+        <div style="text-align: center;">
+            <span class="title-badge">💰 Slip Gaji Pegawai</span>
         </div>
 
-        <div class="info-grid">
-            <table>
-                <tr>
-                    <td class="info-label">Nama</td>
-                    <td style="width: 15px;">:</td>
-                    <td><b>{{ $pegawai->name }}</b></td>
-                    <td class="info-label">Periode</td>
-                    <td style="width: 15px;">:</td>
-                    <td><b>{{ $periode }} {{ date('F Y', strtotime($bulanTahun)) }}</b></td>
-                </tr>
-                <tr>
-                    <td class="info-label">Jabatan</td>
-                    <td>:</td>
-                    <td><b>{{ $pegawai->jabatan ?? '-' }}</b></td>
-                    <td class="info-label">Total Hari Kerja</td>
-                    <td>:</td>
-                    <td><b>{{ $totalHariKerja ?? 0 }} Hari</b></td>
-                </tr>
-            </table>
+        <!-- Info Cards Grid -->
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-card-label">👤 Nama Pegawai</div>
+                <div class="info-card-value">{{ $pegawai->name }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-label">📅 Periode</div>
+                <div class="info-card-value">{{ $periode }} {{ date('F Y', strtotime($bulanTahun)) }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-label">💼 Jabatan</div>
+                <div class="info-card-value">{{ $pegawai->jabatan ?? '-' }}</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-label">📊 Total Hari Kerja</div>
+                <div class="info-card-value">{{ $totalHariKerja ?? 0 }} Hari</div>
+            </div>
         </div>
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Deskripsi Komponen</th>
-                    <th class="amount">Jumlah (Rp)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Gaji Pokok</td>
-                    <td class="amount">{{ number_format($gajiPokok, 0, ',', '.') }}</td>
-                </tr>
-                <tr>
-                    <td>Insentif</td>
-                    <td class="amount">{{ number_format($insentif, 0, ',', '.') }}</td>
-                </tr>
-                <tr class="subtotal-row">
-                    <td>Total Penerimaan</td>
-                    <td class="amount">{{ number_format($gajiPokok + $insentif, 0, ',', '.') }}</td>
-                </tr>
-                
-                <tr class="section-title">
-                    <td colspan="2">PENGURANGAN (POTONGAN)</td>
-                </tr>
-                
+        <!-- Penerimaan Card -->
+        <div class="section-card">
+            <div class="section-header">💵 Penerimaan Gaji</div>
+            
+            <div class="item-row">
+                <span class="item-label">Gaji Pokok</span>
+                <span class="item-value">Rp {{ number_format($gajiPokok, 0, ',', '.') }}</span>
+            </div>
+            <div class="item-row">
+                <span class="item-label">Insentif</span>
+                <span class="item-value">Rp {{ number_format($insentif, 0, ',', '.') }}</span>
+            </div>
+            
+            <div class="subtotal-row">
+                <span>Total Penerimaan</span>
+                <span>Rp {{ number_format($gajiPokok + $insentif, 0, ',', '.') }}</span>
+            </div>
+        </div>
+
+        <!-- Potongan Card -->
+        <div class="section-card">
+            <div class="section-header">✂️ Pengurangan (Potongan)</div>
+            
+            @php
+                $hasPotongan = $jumlahIzin > 0 || $jumlahTidakHadir > 0 || $jumlahTerlambat > 0;
+            @endphp
+            
+            @if($hasPotongan)
                 @if($jumlahIzin > 0)
-                <tr>
-                    <td>Potongan Izin ({{ $jumlahIzin }} Hari × Rp {{ number_format($gajiPerHari ?? 0, 0, ',', '.') }})</td>
-                    <td class="amount">{{ number_format($potonganIzin ?? 0, 0, ',', '.') }}</td>
-                </tr>
+                <div class="item-row">
+                    <span class="item-label">
+                        Potongan Izin 
+                        <span class="badge badge-warning">{{ $jumlahIzin }} Hari</span>
+                    </span>
+                    <span class="item-value">Rp {{ number_format($potonganIzin ?? 0, 0, ',', '.') }}</span>
+                </div>
+                <div class="item-row" style="font-size: 11px; color: #94a3b8; margin-top: -8px; padding-top: 0;">
+                    <span style="padding-left: 15px;">{{ $jumlahIzin }} Hari × Rp {{ number_format($gajiPerHari ?? 0, 0, ',', '.') }}</span>
+                    <span></span>
+                </div>
                 @endif
                 
                 @if($jumlahTidakHadir > 0)
-                <tr>
-                    <td>Potongan Alpha / Tidak Hadir ({{ $jumlahTidakHadir }} Hari × Rp {{ number_format($gajiPerHari ?? 0, 0, ',', '.') }})</td>
-                    <td class="amount">{{ number_format($potonganAlpha ?? 0, 0, ',', '.') }}</td>
-                </tr>
+                <div class="item-row">
+                    <span class="item-label">
+                        Potongan Alpha / Tidak Hadir
+                        <span class="badge badge-danger">{{ $jumlahTidakHadir }} Hari</span>
+                    </span>
+                    <span class="item-value">Rp {{ number_format($potonganAlpha ?? 0, 0, ',', '.') }}</span>
+                </div>
+                <div class="item-row" style="font-size: 11px; color: #94a3b8; margin-top: -8px; padding-top: 0;">
+                    <span style="padding-left: 15px;">{{ $jumlahTidakHadir }} Hari × Rp {{ number_format($gajiPerHari ?? 0, 0, ',', '.') }}</span>
+                    <span></span>
+                </div>
                 @endif
                 
                 @if($jumlahTerlambat > 0)
-                <tr>
-                    <td>Potongan Keterlambatan ({{ $jumlahTerlambat }} Kali × Rp 30.000)</td>
-                    <td class="amount">{{ number_format($potonganTelat ?? 0, 0, ',', '.') }}</td>
-                </tr>
+                <div class="item-row">
+                    <span class="item-label">
+                        Potongan Keterlambatan
+                        <span class="badge badge-warning">{{ $jumlahTerlambat }} Kali</span>
+                    </span>
+                    <span class="item-value">Rp {{ number_format($potonganTelat ?? 0, 0, ',', '.') }}</span>
+                </div>
+                <div class="item-row" style="font-size: 11px; color: #94a3b8; margin-top: -8px; padding-top: 0;">
+                    <span style="padding-left: 15px;">{{ $jumlahTerlambat }} Kali × Rp 30.000</span>
+                    <span></span>
+                </div>
                 @endif
                 
-                @if($jumlahIzin == 0 && $jumlahTidakHadir == 0 && $jumlahTerlambat == 0)
-                <tr>
-                    <td colspan="2" style="text-align: center; color: #10b981; font-style: italic;">
-                        <i>Tidak ada potongan - Kehadiran sempurna!</i>
-                    </td>
-                </tr>
-                @endif
-                
-                <tr class="subtotal-row">
-                    <td>Total Potongan</td>
-                    <td class="amount">{{ number_format($totalPengurangan, 0, ',', '.') }}</td>
-                </tr>
-                
-                <tr class="grand-total">
-                    <td>TOTAL GAJI BERSIH (TAKE HOME PAY)</td>
-                    <td class="amount">Rp {{ number_format($totalGaji, 0, ',', '.') }}</td>
-                </tr>
-            </tbody>
-        </table>
+                <div class="subtotal-row">
+                    <span>Total Potongan</span>
+                    <span>Rp {{ number_format($totalPengurangan, 0, ',', '.') }}</span>
+                </div>
+            @else
+                <div class="empty-state">
+                    ✨ Tidak ada potongan - Kehadiran sempurna! ✨
+                </div>
+            @endif
+        </div>
 
-        <div class="footer">
+        <!-- Grand Total Card -->
+        <div class="grand-total-card">
+            <div class="grand-total-label">Total Gaji Bersih (Take Home Pay)</div>
+            <div class="grand-total-value">Rp {{ number_format($totalGaji, 0, ',', '.') }}</div>
+        </div>
+
+        <!-- Signature -->
+        <div class="signature-section">
             <div class="signature-box">
                 <div class="signature-date">Palembang, {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</div>
                 <div class="signature-title">Pegawai yang bersangkutan,</div>
                 <div class="signature-name">{{ $pegawai->name }}</div>
-                <div class="signature-line"></div>
             </div>
-            <div class="clear"></div>
         </div>
     </div>
 </body>
