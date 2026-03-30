@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PT JAYA ABADI</title>
+    <title>@yield('title', 'Dashboard') - PT JAYA ABADI</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -41,16 +43,26 @@
             flex-direction: column;
         }
         .brand {
-            font-size: 22px;
-            font-weight: 700;
-            color: white;
-            height: 75px;
+            height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             background: rgba(0,0,0,0.2);
+            padding: 20px;
+            gap: 15px;
+        }
+        .brand img {
+            max-height: 50px;
+            width: auto;
+            object-fit: contain;
+        }
+        .brand-text {
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
             letter-spacing: 1px;
+            text-transform: uppercase;
         }
         .header {
             background: rgba(255, 255, 255, 0.95);
@@ -64,7 +76,7 @@
             top: 0;
             left: 280px;
             width: calc(100% - 280px);
-            height: 75px;
+            height: 90px;
             z-index: 1000;
             transition: all 0.3s ease;
         }
@@ -118,7 +130,7 @@
         }
         .content {
             margin-left: 280px;
-            padding: 100px 30px 30px;
+            padding: 115px 30px 30px;
             min-height: 100vh;
         }
         /* Cards */
@@ -210,7 +222,8 @@
 <body>
     <div class="sidebar">
         <div class="brand">
-            <i class="fa-solid fa-building me-2"></i> PT JAYA ABADI
+            <img src="{{ asset('images/logoNew.png') }}" alt="Logo PT Jaya Abadi">
+            <span class="brand-text">Jaya Abadi</span>
         </div>
         
         
