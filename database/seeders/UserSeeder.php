@@ -11,10 +11,12 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->command->info('🔄 Creating users...');
+        
         User::firstOrCreate(
             ['email' => 'admin@example.com'],
             [
-                'name' => 'Admin User',
+                'name' => 'Administrator',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'remember_token' => Str::random(10),
@@ -24,11 +26,15 @@ class UserSeeder extends Seeder
         User::firstOrCreate(
             ['email' => 'user@example.com'],
             [
-                'name' => 'Test User',
+                'name' => 'User Demo',
                 'email_verified_at' => now(),
                 'password' => Hash::make('password'),
                 'remember_token' => Str::random(10),
             ]
         );
+        
+        $this->command->info('✅ 2 users berhasil di-seed!');
+        $this->command->info('   📧 admin@example.com / password');
+        $this->command->info('   📧 user@example.com / password');
     }
 }

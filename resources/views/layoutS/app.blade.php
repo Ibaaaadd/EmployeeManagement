@@ -199,6 +199,12 @@
         .btn-primary { background-color: var(--accent-color); border-color: var(--accent-color); }
         .btn-success { background-color: #2ecc71; border-color: #2ecc71; }
         .btn-warning { background-color: var(--accent-color); border-color: var(--accent-color); color: white; }
+        
+        /* Hover lift effect for cards */
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+        }
     </style>
 </head>
 <body>
@@ -236,13 +242,13 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ url('/penggajian') }}" class="nav-link {{ request()->is('penggajian') ? 'active' : '' }}">
-                    <i class="fa-solid fa-money-bill-wave"></i> Penggajian
+                <a href="{{ url('/histori-gaji') }}" class="nav-link {{ request()->is('histori-gaji*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-money-bill-wave"></i> Histori Gaji
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ url('/riwayat-gaji') }}" class="nav-link {{ request()->is('riwayat-gaji') ? 'active' : '' }}">
-                    <i class="fa-solid fa-file-invoice-dollar"></i> Histori Gaji
+                <a href="{{ url('/setting-libur') }}" class="nav-link {{ request()->is('setting-libur') ? 'active' : '' }}">
+                    <i class="fa-solid fa-calendar-times"></i> Setting Tanggal
                 </a>
             </li>
         </ul>

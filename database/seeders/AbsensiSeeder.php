@@ -14,21 +14,46 @@ class AbsensiSeeder extends Seeder
     {
         $faker = Faker::create('id_ID');
         $pegawais = Pegawai::all();
+        
+        // Clear existing data
+        DB::table('absensis')->truncate();
+        
         $data = [];
 
-// Generate data absensi untuk 30 hari ke belakang
-        $startDate = Carbon::now()->subDays(30);
+        // Generate data absensi untuk 2 bulan ke belakang
+        $startDate = Carbon::now()->subMonths(2)->startOfMonth();
         $endDate = Carbon::now();
+
+        $this->command->info('🔄 Generating absensi data...');
 
         foreach ($pegawais as $pegawai) {
             $currentDate = $startDate->copy();
+            $absenCount = 0;
+            
             while ($currentDate <= $endDate) {
+                // Hanya hari kerja (Senin-Jumat)
                 if ($currentDate->isWeekday()) {
-                    $status = $faker->randomElement(['Hadir', 'Hadir', 'Hadir', 'Hadir', 'Izin', 'Tidak Hadir']);
+                    // 85% Hadir, 10% Izin, 5% Tidak Hadir
+                    $rand = rand(1, 100);
+                    if ($rand <= 85) {
+                        $status = 'Hadir';
+                    } elseif ($rand <= 95) {
+                        $status = 'Izin';
+                    } else {
+                        $status = 'Tidak Hadir';
+                    }
                     
-                    $jamMasukHour = random_int(7, 9);
-                    $jamMasukMin = random_int(0, 59);
-                    $timestamp = $currentDate->copy()->setTime(8, 0, 0); // Default attendance_time bisa diset ke jam awal masuk
+                    // Random jam masuk antara 07:00 - 09:30
+                    $jamMasukHour = rand(7, 9);
+                    $jamMasukMin = rand(0, 59);
+                    
+                    // Jika jam > 9 atau (jam 9 dan menit > 0), maka skip ke jam 8
+                    if ($jamMasukHour > 9 || ($jamMasukHour === 9 && $jamMasukMin > 30)) {
+                        $jamMasukHour = 8;
+                        $jamMasukMin = rand(0, 30);
+                    }
+                    
+                    $timestamp = $currentDate->copy()->setTime($jamMasukHour, $jamMasukMin, 0);
                     
                     $jamMasukStr = null;
                     $jamPulangStr = null;
@@ -38,11 +63,14 @@ class AbsensiSeeder extends Seeder
 
                     if ($status === 'Hadir') {
                         $jamMasukStr = sprintf('%02d:%02d:00', $jamMasukHour, $jamMasukMin);
-                        $jamPulangHour = random_int(16, 18);
-                        $jamPulangMin = random_int(0, 59);
+                        
+                        // Jam pulang antara 16:00 - 18:00
+                        $jamPulangHour = rand(16, 18);
+                        $jamPulangMin = rand(0, 59);
                         $jamPulangStr = sprintf('%02d:%02d:00', $jamPulangHour, $jamPulangMin);
-                        $attendancePhoto = 'foto_dummy.jpg';
-                        $attendancePhotoPulang = 'foto_dummy_pulang.jpg';
+                        
+                        $attendancePhoto = 'attendance_photos/dummy_masuk.png';
+                        $attendancePhotoPulang = 'attendance_photos/dummy_pulang.png';
                         
                         // Cek telat (> 08:00)
                         if ($jamMasukHour > 8 || ($jamMasukHour === 8 && $jamMasukMin > 0)) {
@@ -63,15 +91,20 @@ class AbsensiSeeder extends Seeder
                         'created_at' => $timestamp,
                         'updated_at' => $timestamp,
                     ];
+                    
+                    $absenCount++;
                 }
                 $currentDate->addDay();
             }
         }
 
-        // Chunking insert agar tidak terlalu berat jika banyak
-        $chunks = array_chunk($data, 100);
+        // Chunking insert agar tidak terlalu berat
+        $chunks = array_chunk($data, 200);
         foreach ($chunks as $chunk) {
             DB::table('absensis')->insert($chunk);
         }
+        
+        $this->command->info('✅ ' . count($data) . ' data absensi berhasil di-seed!');
+        $this->command->info('📅 Periode: ' . $startDate->format('Y-m-d') . ' s/d ' . $endDate->format('Y-m-d'));
     }
 }

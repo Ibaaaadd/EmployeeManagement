@@ -191,7 +191,9 @@
                     <td class="info-label">Jabatan</td>
                     <td>:</td>
                     <td><b>{{ $pegawai->jabatan ?? '-' }}</b></td>
-                    <td colspan="3"></td>
+                    <td class="info-label">Total Hari Kerja</td>
+                    <td>:</td>
+                    <td><b>{{ $totalHariKerja ?? 0 }} Hari</b></td>
                 </tr>
             </table>
         </div>
@@ -220,14 +222,36 @@
                 <tr class="section-title">
                     <td colspan="2">PENGURANGAN (POTONGAN)</td>
                 </tr>
+                
+                @if($jumlahIzin > 0)
                 <tr>
-                    <td>Izin ({{ $jumlahIzin }} Hari x Rp {{ number_format($gajiPerHari ?? 30000, 0, ',', '.') }})</td>
-                    <td class="amount">{{ number_format($jumlahIzin * ($gajiPerHari ?? 30000), 0, ',', '.') }}</td>
+                    <td>Potongan Izin ({{ $jumlahIzin }} Hari × Rp {{ number_format($gajiPerHari ?? 0, 0, ',', '.') }})</td>
+                    <td class="amount">{{ number_format($potonganIzin ?? 0, 0, ',', '.') }}</td>
                 </tr>
+                @endif
+                
+                @if($jumlahTidakHadir > 0)
                 <tr>
-<td>Tidak Hadir ({{ $jumlahTidakHadir }} Hari x Rp {{ number_format($gajiPerHari ?? 30000, 0, ',', '.') }})</td>
-                    <td class="amount">{{ number_format($jumlahTidakHadir * ($gajiPerHari ?? 30000), 0, ',', '.') }}</td>
+                    <td>Potongan Alpha / Tidak Hadir ({{ $jumlahTidakHadir }} Hari × Rp {{ number_format($gajiPerHari ?? 0, 0, ',', '.') }})</td>
+                    <td class="amount">{{ number_format($potonganAlpha ?? 0, 0, ',', '.') }}</td>
                 </tr>
+                @endif
+                
+                @if($jumlahTerlambat > 0)
+                <tr>
+                    <td>Potongan Keterlambatan ({{ $jumlahTerlambat }} Kali × Rp 30.000)</td>
+                    <td class="amount">{{ number_format($potonganTelat ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                @endif
+                
+                @if($jumlahIzin == 0 && $jumlahTidakHadir == 0 && $jumlahTerlambat == 0)
+                <tr>
+                    <td colspan="2" style="text-align: center; color: #10b981; font-style: italic;">
+                        <i>Tidak ada potongan - Kehadiran sempurna!</i>
+                    </td>
+                </tr>
+                @endif
+                
                 <tr class="subtotal-row">
                     <td>Total Potongan</td>
                     <td class="amount">{{ number_format($totalPengurangan, 0, ',', '.') }}</td>

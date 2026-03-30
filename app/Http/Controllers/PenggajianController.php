@@ -121,6 +121,27 @@ class PenggajianController extends Controller
         return view('penggajian', compact('pegawais'));
     }
 
+    // New method for unified salary history page
+    public function historiGajiIndex()
+    {
+        // Daftar semua pegawai dengan riwayat gaji mereka
+        $pegawais = Pegawai::with(['riwayat_gajis' => function($q) {
+            $q->orderBy('tanggal', 'desc');
+        }])->orderBy('name', 'asc')->get();
+        
+        return view('histori-gaji', compact('pegawais'));
+    }
+
+    // New method for detailed salary history per employee
+    public function historiGajiDetail($id)
+    {
+        $pegawai = Pegawai::with(['riwayat_gajis' => function($q) {
+            $q->orderBy('tanggal', 'desc');
+        }])->findOrFail($id);
+
+        return view('histori-gaji-detail', compact('pegawai'));
+    }
+
     public function show($id)
     {
         $pegawai = Pegawai::with(['riwayat_gajis' => function($q) {
@@ -172,6 +193,12 @@ class PenggajianController extends Controller
     {
         $riwayat = \App\Models\RiwayatGaji::with('pegawai')->findOrFail($id);
 
+        // Calculate breakdown potongan
+        $potonganIzin = $riwayat->jumlah_izin * ($riwayat->gaji_per_hari ?? 0);
+        $potonganAlpha = $riwayat->jumlah_tidak_hadir * ($riwayat->gaji_per_hari ?? 0);
+        $potonganTelat = $riwayat->potongan - ($potonganIzin + $potonganAlpha);
+        $jumlahTerlambat = $potonganTelat > 0 ? ($potonganTelat / 30000) : 0;
+
         $viewData = [
             'pegawai' => $riwayat->pegawai,
             'periode' => $riwayat->periode,
@@ -180,9 +207,14 @@ class PenggajianController extends Controller
             'insentif' => $riwayat->insentif,
             'jumlahIzin' => $riwayat->jumlah_izin ?? 0,
             'jumlahTidakHadir' => $riwayat->jumlah_tidak_hadir ?? 0,
+            'jumlahTerlambat' => $jumlahTerlambat,
             'gajiPerHari' => $riwayat->gaji_per_hari ?? 30000,
+            'potonganIzin' => $potonganIzin,
+            'potonganAlpha' => $potonganAlpha,
+            'potonganTelat' => $potonganTelat,
             'totalPengurangan' => $riwayat->potongan ?? 0,
             'totalGaji' => $riwayat->total_gaji,
+            'totalHariKerja' => $riwayat->total_hari_kerja ?? 0,
         ];
         $pdf = Pdf::loadView('slip_pdf', $viewData);
 

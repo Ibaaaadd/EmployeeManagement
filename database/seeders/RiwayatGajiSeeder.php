@@ -4,44 +4,44 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use App\Models\Pegawai;
+use App\Http\Controllers\PenggajianController;
+use Carbon\Carbon;
 
 class RiwayatGajiSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('riwayat_gajis')->insert([
-            [
-                'pegawai_id' => 1,
-                'periode' => 'Juni 2025',
-                'tanggal' => now()->subDays(20)->format('Y-m-d'),
-                'gaji_pokok' => 5000000,
-                'insentif' => 500000,
-                'potongan' => 100000,
-                'total_gaji' => 5400000,
-                'jumlah_izin' => 1,
-                'jumlah_tidak_hadir' => 0,
-                'total_hari_kerja' => 20,
-                'gaji_per_hari' => 250000,
-                'tanggal_merah' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'pegawai_id' => 2,
-                'periode' => 'Juni 2025',
-                'tanggal' => now()->subDays(20)->format('Y-m-d'),
-                'gaji_pokok' => 4500000,
-                'insentif' => 300000,
-                'potongan' => 50000,
-                'total_gaji' => 4750000,
-                'jumlah_izin' => 0,
-                'jumlah_tidak_hadir' => 0,
-                'total_hari_kerja' => 20,
-                'gaji_per_hari' => 225000,
-                'tanggal_merah' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]
-        ]);
+        // Clear existing data
+        DB::table('riwayat_gajis')->truncate();
+        
+        $this->command->info('🔄 Generating riwayat gaji data...');
+        
+        $pegawais = Pegawai::all();
+        $penggajianController = new PenggajianController();
+        
+        // Generate untuk 2 bulan ke belakang sampai bulan ini
+        $months = [
+            Carbon::now()->subMonths(2)->startOfMonth(),
+            Carbon::now()->subMonth()->startOfMonth(),
+            Carbon::now()->startOfMonth(),
+        ];
+        
+        $totalGenerated = 0;
+        
+        foreach ($pegawais as $pegawai) {
+            foreach ($months as $month) {
+                try {
+                    // Call the updateGajiBulan method untuk auto-calculate
+                    $penggajianController->updateGajiBulan($pegawai->id, $month);
+                    $totalGenerated++;
+                } catch (\Exception $e) {
+                    $this->command->error("Error untuk pegawai {$pegawai->name} bulan {$month->format('Y-m')}: " . $e->getMessage());
+                }
+            }
+        }
+        
+        $this->command->info('✅ ' . $totalGenerated . ' data riwayat gaji berhasil di-generate!');
+        $this->command->info('📊 ' . count($pegawais) . ' pegawai x 3 bulan');
     }
 }

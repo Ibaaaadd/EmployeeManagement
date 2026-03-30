@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PegawaiController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\PenggajianController;
+use App\Http\Controllers\SettingLiburController;
 use App\Http\Controllers\AuthenticatedSessionController;
 use SebastianBergmann\CodeCoverage\Report\Html\Dashboard;
 
@@ -30,14 +31,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pegawai/{id}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
     Route::get('/absensi', [AbsensiController::class, 'create'])->name('absensi.index');
     Route::get('/api/pegawai-belum-digaji', [PenggajianController::class, 'getPegawaiBelumDigaji'])->name('api.pegawai.belumdigaji');
+    
+    // Old routes (keep for backward compatibility)
     Route::get('/penggajian', [PenggajianController::class, 'index'])->name('gaji.index');
     Route::get('/penggajian/{id}', [PenggajianController::class, 'show'])->name('gaji.show');
     Route::get('/riwayat-gaji', [PenggajianController::class, 'riwayat'])->name('gaji.riwayat');
+    
+    // New unified salary history routes
+    Route::get('/histori-gaji', [PenggajianController::class, 'historiGajiIndex'])->name('histori-gaji.index');
+    Route::get('/histori-gaji/{id}', [PenggajianController::class, 'historiGajiDetail'])->name('histori-gaji.detail');
+    
     Route::get('/riwayat/{id}/preview', [PenggajianController::class, 'previewSlip'])->name('riwayat.preview');
     Route::delete('/riwayat-gaji/{id}', [PenggajianController::class, 'destroyRiwayat'])->name('riwayat.destroy');
     Route::get('/riwayat-gaji/download/{id}', [PenggajianController::class, 'downloadFromRiwayat'])->name('riwayat.download');
     Route::get('/riwayat-absensi', [AbsensiController::class, 'riwayat'])->name('absensi.riwayat');
-    Route::get('/riwayat-absensi/download', [AbsensiController::class, 'downloadPdf'])->name('absensi.riwayat.download');    // Tambahkan route lain yang ingin kamu proteksi
+    Route::get('/riwayat-absensi/download', [AbsensiController::class, 'downloadPdf'])->name('absensi.riwayat.download');
+    
+    // Setting Tanggal Merah routes
+    Route::get('/setting-libur', [SettingLiburController::class, 'index'])->name('setting-libur.index');
+    Route::post('/setting-libur', [SettingLiburController::class, 'store'])->name('setting-libur.store');
+    Route::delete('/setting-libur/{bulan}', [SettingLiburController::class, 'destroy'])->name('setting-libur.destroy');
 });
 
 // Menyimpan pegawai
