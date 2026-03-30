@@ -43,13 +43,12 @@
             flex-direction: column;
         }
         .brand {
-            height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             background: rgba(0,0,0,0.2);
-            padding: 20px;
+            padding: 12px;
             gap: 15px;
         }
         .brand img {
@@ -76,7 +75,6 @@
             top: 0;
             left: 280px;
             width: calc(100% - 280px);
-            height: 90px;
             z-index: 1000;
             transition: all 0.3s ease;
         }
