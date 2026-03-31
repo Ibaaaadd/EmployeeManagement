@@ -38,6 +38,7 @@ class PenggajianController extends Controller
             ->whereDate('attendance_time', '<=', $endDate)
             ->get();
 
+        $jumlahHadir = 0;
         $jumlahIzin = 0;
         $jumlahTidakHadir = 0;
         $jumlahTerlambat = 0;
@@ -57,6 +58,10 @@ class PenggajianController extends Controller
 
         $currentDate = $startDate->copy();
         $today = \Carbon\Carbon::today();
+        $now = \Carbon\Carbon::now();
+        $cutoffTime = \Carbon\Carbon::today()->setTime(17, 0, 0); // Jam 5 sore
+        
+        // Evaluasi sampai dengan hari ini (termasuk hari ini)
         $evalEndDate = $endDate->gt($today) ? $today : $endDate;
 
         while ($currentDate <= $evalEndDate) {
@@ -73,14 +78,23 @@ class PenggajianController extends Controller
                             $jumlahIzin++;
                         } elseif ($att->status == 'Tidak Hadir') {
                             $jumlahTidakHadir++;
-                        } elseif ($att->status == 'Hadir' && $att->is_late) {
-                            $jumlahTerlambat++;
+                        } elseif ($att->status == 'Hadir') {
+                            $jumlahHadir++;
+                            if ($att->is_late) {
+                                $jumlahTerlambat++;
+                            }
                         }
                     } else {
-                        // Jika tidak ada data absen tapi hari ini terlewat => otomatis dianggap tidak hadir
-                        // Asumsi jika hari kerja terlewati dan belum absen = Alpha (Tidak Hadir)
+                        // Jika tidak ada data absen
                         if ($currentDate->lt($today)) {
+                            // Hari sudah lewat, otomatis alpha
                             $jumlahTidakHadir++;
+                        } elseif ($currentDate->isSameDay($today)) {
+                            // Hari ini: cek apakah sudah lewat jam 5 sore
+                            if ($now->gte($cutoffTime)) {
+                                // Sudah lewat jam 5 sore, belum absen = auto alpha
+                                $jumlahTidakHadir++;
+                            }
                         }
                     }
                 }
@@ -88,10 +102,10 @@ class PenggajianController extends Controller
             $currentDate->addDay();
         }
 
-        $potonganAbsen = ($jumlahIzin + $jumlahTidakHadir) * $gajiPerHari;
+        // Sistem Akumulatif: gaji dihitung dari jumlah hari hadir
+        $totalGajiHadir = $jumlahHadir * $gajiPerHari;
         $potonganTelat = $jumlahTerlambat * 30000;
-        $totalPengurangan = $potonganAbsen + $potonganTelat;
-        $totalGaji = $gajiPokok - $totalPengurangan;
+        $totalGaji = $totalGajiHadir - $potonganTelat;
 
         // Update or Create di RiwayatGaji
         RiwayatGaji::updateOrCreate(
@@ -103,10 +117,12 @@ class PenggajianController extends Controller
                 'periode' => '1 Bulan Full',
                 'gaji_pokok' => $gajiPokok,
                 'insentif' => 0, // default, atau bisa disesuaikan nanti
-                'potongan' => $totalPengurangan,
+                'potongan' => $potonganTelat,
                 'total_gaji' => $totalGaji,
+                'jumlah_hadir' => $jumlahHadir,
                 'jumlah_izin' => $jumlahIzin,
                 'jumlah_tidak_hadir' => $jumlahTidakHadir,
+                'jumlah_terlambat' => $jumlahTerlambat,
                 'total_hari_kerja' => $totalHariKerja,
                 'gaji_per_hari' => $gajiPerHari,
                 'tanggal_merah' => $settingLibur ? $settingLibur->tanggal_merah : null,
@@ -122,14 +138,20 @@ class PenggajianController extends Controller
     }
 
     // New method for unified salary history page
-    public function historiGajiIndex()
+    public function historiGajiIndex(Request $request)
     {
-        // Daftar semua pegawai dengan riwayat gaji mereka
-        $pegawais = Pegawai::with(['riwayat_gajis' => function($q) {
+        $query = Pegawai::with(['riwayat_gajis' => function($q) {
             $q->orderBy('tanggal', 'desc');
-        }])->orderBy('name', 'asc')->get();
+        }]);
+
+        if ($request->filled('employee_id')) {
+            $query->where('id', $request->employee_id);
+        }
+
+        $pegawais = $query->orderBy('name', 'asc')->paginate(10);
+        $pegawaiList = Pegawai::orderBy('name', 'asc')->get();
         
-        return view('histori-gaji', compact('pegawais'));
+        return view('histori-gaji', compact('pegawais', 'pegawaiList'));
     }
 
     // New method for detailed salary history per employee

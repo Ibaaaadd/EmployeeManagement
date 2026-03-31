@@ -20,8 +20,10 @@ return new class extends Migration
             $table->integer('insentif');
             $table->integer('potongan');
             $table->integer('total_gaji');
+            $table->integer('jumlah_hadir')->default(0);
             $table->integer('jumlah_izin')->default(0);
             $table->integer('jumlah_tidak_hadir')->default(0);
+            $table->integer('jumlah_terlambat')->default(0);
             $table->integer('total_hari_kerja')->default(0);
             $table->integer('gaji_per_hari')->default(0);
             $table->string('tanggal_merah')->nullable();
