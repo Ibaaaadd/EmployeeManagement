@@ -29,18 +29,25 @@ class AuthenticatedSessionController extends Controller
         $user = User::first();
 
         if (!$user) {
-            // Buat pengguna pertama kali jika belum ada
+            // Buat pengguna admin pertama kali jika belum ada
             $user = User::create([
                 'name' => 'Admin',
                 'email' => 'admin@example.com',
-                'password' => Hash::make('password'), // Ubah password sesuai kebutuhan
+                'password' => Hash::make('password'),
+                'role' => 'admin', // Set role admin untuk user pertama
             ]);
         }
 
         // Verifikasi login
         if (Auth::attempt($request->only('email', 'password'))) {
-            // Jika login berhasil, arahkan ke dashboard
-            return redirect()->route('absensi.index');
+            $user = Auth::user();
+            
+            // Redirect berdasarkan role
+            if ($user && $user->role === 'admin') {
+                return redirect()->route('pegawai.index'); // Admin ke halaman pegawai
+            } else {
+                return redirect()->route('absensi.index'); // User biasa ke absensi
+            }
         }
 
         // Jika login gagal, kembali dengan error

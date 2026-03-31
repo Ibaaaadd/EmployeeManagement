@@ -8,6 +8,7 @@ use App\Models\Penggajian;
 use App\Models\RiwayatGaji;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenggajianController extends Controller
@@ -132,8 +133,20 @@ class PenggajianController extends Controller
 
     public function index()
     {
-        // Daftar semua karyawan beserta riwayat gajinya
-        $pegawais = Pegawai::with('riwayat_gajis')->get();
+        $user = Auth::user();
+        
+        // Admin bisa lihat semua, user biasa hanya lihat dirinya
+        if ($user && $user->role === 'user') {
+            if (!$user->pegawai_id) {
+                return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan data pegawai.');
+            }
+            $pegawais = Pegawai::with('riwayat_gajis')
+                ->where('id', $user->pegawai_id)
+                ->get();
+        } else {
+            $pegawais = Pegawai::with('riwayat_gajis')->get();
+        }
+        
         return view('penggajian', compact('pegawais'));
     }
 
@@ -144,12 +157,25 @@ class PenggajianController extends Controller
             $q->orderBy('tanggal', 'desc');
         }]);
 
-        if ($request->filled('employee_id')) {
+        $user = Auth::user();
+        
+        // User biasa hanya bisa lihat dirinya sendiri
+        if ($user && $user->role === 'user') {
+            if (!$user->pegawai_id) {
+                return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan data pegawai.');
+            }
+            $query->where('id', $user->pegawai_id);
+        } elseif ($request->filled('employee_id')) {
+            // Admin bisa filter by employee_id
             $query->where('id', $request->employee_id);
         }
 
         $pegawais = $query->orderBy('name', 'asc')->paginate(10);
-        $pegawaiList = Pegawai::orderBy('name', 'asc')->get();
+        
+        // Hanya admin yang bisa lihat dropdown pegawai list
+        $pegawaiList = ($user && $user->role === 'admin')
+            ? Pegawai::orderBy('name', 'asc')->get()
+            : collect();
         
         return view('histori-gaji', compact('pegawais', 'pegawaiList'));
     }
@@ -157,6 +183,13 @@ class PenggajianController extends Controller
     // New method for detailed salary history per employee
     public function historiGajiDetail($id)
     {
+        $user = Auth::user();
+        
+        // User biasa hanya bisa lihat detail dirinya sendiri
+        if ($user && $user->role === 'user' && $user->pegawai_id != $id) {
+            abort(403, 'Anda hanya dapat melihat data gaji Anda sendiri.');
+        }
+
         $pegawai = Pegawai::with(['riwayat_gajis' => function($q) {
             $q->orderBy('tanggal', 'desc');
         }])->findOrFail($id);
@@ -166,6 +199,13 @@ class PenggajianController extends Controller
 
     public function show($id)
     {
+        $user = Auth::user();
+        
+        // User biasa hanya bisa lihat dirinya sendiri
+        if ($user && $user->role === 'user' && $user->pegawai_id != $id) {
+            abort(403, 'Anda hanya dapat melihat data gaji Anda sendiri.');
+        }
+
         $pegawai = Pegawai::with(['riwayat_gajis' => function($q) {
             $q->orderBy('tanggal', 'desc');
         }])->findOrFail($id);
@@ -177,7 +217,17 @@ class PenggajianController extends Controller
     {
         $query = RiwayatGaji::with('pegawai');
 
-        if ($request->filled('nama')) {
+        $user = Auth::user();
+        
+        // User biasa hanya bisa lihat riwayatnya sendiri
+        if ($user && $user->role === 'user') {
+            if (!$user->pegawai_id) {
+                return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan data pegawai.');
+            }
+            $query->where('pegawai_id', $user->pegawai_id);
+        }
+
+        if ($user && $user->role === 'admin' && $request->filled('nama')) {
             $query->whereHas('pegawai', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->nama . '%');
             });
@@ -215,6 +265,13 @@ class PenggajianController extends Controller
     {
         $riwayat = \App\Models\RiwayatGaji::with('pegawai')->findOrFail($id);
 
+        $user = Auth::user();
+        
+        // User biasa hanya bisa download slip dirinya sendiri
+        if ($user && $user->role === 'user' && $user->pegawai_id != $riwayat->pegawai_id) {
+            abort(403, 'Anda hanya dapat melihat slip gaji Anda sendiri.');
+        }
+
         // Calculate breakdown potongan
         $potonganIzin = $riwayat->jumlah_izin * ($riwayat->gaji_per_hari ?? 0);
         $potonganAlpha = $riwayat->jumlah_tidak_hadir * ($riwayat->gaji_per_hari ?? 0);
@@ -246,6 +303,13 @@ class PenggajianController extends Controller
     public function downloadSlip(Request $request)
     {
         $pegawai = Pegawai::findOrFail($request->pegawai_id);
+
+        $user = Auth::user();
+        
+        // User biasa hanya bisa download slip dirinya sendiri
+        if ($user && $user->role === 'user' && $user->pegawai_id != $request->pegawai_id) {
+            abort(403, 'Anda hanya dapat download slip gaji Anda sendiri.');
+        }
 
         $data = [
             'pegawai' => $pegawai,

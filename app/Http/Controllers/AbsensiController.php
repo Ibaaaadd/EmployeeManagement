@@ -6,6 +6,7 @@ use App\Models\Absensi;
 use App\Models\Pegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Carbon;
 
@@ -14,18 +15,31 @@ class AbsensiController extends Controller
     // Menampilkan halaman absensi
     public function index()
     {
-        // $pegawaiList = Pegawai::all(); // Ambil semua data pegawai
-        // return view('absensi', compact('pegawaiList'));
         $today = Carbon::today()->toDateString();
-
         $sudahAbsenIds = Absensi::whereDate('attendance_time', $today)->pluck('pegawai_id');
 
-        $pegawaiBelumAbsen = Pegawai::whereNotIn('id', $sudahAbsenIds)->paginate(10);
+        $user = Auth::user();
+        
+        // Jika user biasa, hanya tampilkan data pegawai miliknya sendiri
+        if ($user && $user->role === 'user') {
+            if (!$user->pegawai_id) {
+                return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan data pegawai.');
+            }
+            
+            $pegawaiList = Pegawai::where('id', $user->pegawai_id)->get();
+            $pegawaiBelumAbsen = Pegawai::where('id', $user->pegawai_id)
+                ->whereNotIn('id', $sudahAbsenIds)
+                ->paginate(10);
+        } else {
+            // Admin bisa lihat semua
+            $pegawaiList = Pegawai::all();
+            $pegawaiBelumAbsen = Pegawai::whereNotIn('id', $sudahAbsenIds)->paginate(10);
+        }
 
         return view('absensi', [
-            'pegawaiList' => Pegawai::all(),
+            'pegawaiList' => $pegawaiList,
             'pegawaiBelumAbsen' => $pegawaiBelumAbsen,
-        ]); // Kirim data pegawai ke view
+        ]);
     }
 
     // Menyimpan data absensi
@@ -36,9 +50,18 @@ class AbsensiController extends Controller
             'employee_id' => 'required|exists:pegawais,id',
             'status' => 'required|in:Hadir,Izin,Tidak Hadir',
             'tipe_absen' => 'required_if:status,Hadir|in:masuk,pulang',
-            'attendance_photo' => 'nullable|string', // Validasi base64 string
+            'attendance_photo' => 'nullable|string',
             'attendance_time' => 'required|date',
         ]);
+
+        $user = Auth::user();
+        
+        // Security: User biasa hanya bisa absen untuk dirinya sendiri
+        if ($user && $user->role === 'user') {
+            if ($user->pegawai_id != $request->employee_id) {
+                abort(403, 'Anda hanya dapat melakukan absensi untuk diri sendiri.');
+            }
+        }
 
         // Cari pegawai berdasarkan ID
         $pegawai = Pegawai::findOrFail($request->employee_id);
@@ -114,16 +137,27 @@ class AbsensiController extends Controller
     }
 
     public function riwayat(Request $request)
-{
-    $query = Absensi::with('pegawai');
+    {
+        $query = Absensi::with('pegawai');
 
-    if ($request->filled('nama')) {
-        $query->whereHas('pegawai', function ($q) use ($request) {
-            $q->where('name', 'like', '%' . $request->nama . '%');
-        });
-    }
+        $user = Auth::user();
+        
+        // User biasa hanya bisa lihat riwayat dirinya sendiri
+        if ($user && $user->role === 'user') {
+            if (!$user->pegawai_id) {
+                return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan data pegawai.');
+            }
+            $query->where('pegawai_id', $user->pegawai_id);
+        }
 
-    $bulan = $request->input('bulan', \Carbon\Carbon::now()->format('Y-m'));
+        // Filter berdasarkan nama (hanya untuk admin)
+        if ($user && $user->role === 'admin' && $request->filled('nama')) {
+            $query->whereHas('pegawai', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->nama . '%');
+            });
+        }
+
+        $bulan = $request->input('bulan', \Carbon\Carbon::now()->format('Y-m'));
         $tanggal = \Carbon\Carbon::parse($bulan);
         $query->whereMonth('attendance_time', $tanggal->month)
               ->whereYear('attendance_time', $tanggal->year);

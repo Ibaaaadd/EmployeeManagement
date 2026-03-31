@@ -21,12 +21,29 @@
                             @csrf
                             <div class="mb-3">
                                 <label for="employee_id" class="form-label fw-bold text-secondary small text-uppercase">Nama Pegawai</label>
-                                <select class="form-select w-100 select-search" id="employee_id" name="employee_id" required>
-                                    <option value="" disabled selected>-- Pilih Pegawai --</option>
-                                    @foreach($pegawaiList as $pegawai)
-                                        <option value="{{ $pegawai->id }}">{{ $pegawai->name }}</option>
-                                    @endforeach
-                                </select>
+                                @auth
+                                    @if(Auth::user()->role === 'admin')
+                                        {{-- Admin bisa pilih semua pegawai --}}
+                                        <select class="form-select w-100 select-search" id="employee_id" name="employee_id" required>
+                                            <option value="" disabled selected>-- Pilih Pegawai --</option>
+                                            @foreach($pegawaiList as $pegawai)
+                                                <option value="{{ $pegawai->id }}">{{ $pegawai->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    @else
+                                        {{-- User biasa hanya bisa absen untuk dirinya sendiri --}}
+                                        @if(Auth::user()->pegawai_id && $pegawaiList->isNotEmpty())
+                                            <input type="text" class="form-control" value="{{ $pegawaiList->first()->name }}" disabled readonly>
+                                            <input type="hidden" name="employee_id" value="{{ Auth::user()->pegawai_id }}">
+                                            <small class="text-muted">Anda hanya dapat melakukan absensi untuk diri sendiri</small>
+                                        @else
+                                            <input type="text" class="form-control" value="Data pegawai tidak ditemukan" disabled readonly>
+                                            <small class="text-danger">Hubungi administrator untuk menghubungkan akun Anda dengan data pegawai</small>
+                                        @endif
+                                    @endif
+                                @else
+                                    <input type="text" class="form-control" value="Silakan login terlebih dahulu" disabled readonly>
+                                @endauth
                             </div>
 
                             <div class="mb-3">

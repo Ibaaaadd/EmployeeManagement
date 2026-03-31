@@ -227,41 +227,52 @@
         
 
         <ul class="nav flex-column mt-2">
-            <li class="nav-item">
-                <a href="/dashboard" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
-                    <i class="fa-solid fa-chart-line"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url('/pegawai') }}" class="nav-link {{ request()->is('pegawai') ? 'active' : '' }}">
-                    <i class="fa-solid fa-user-plus"></i> Input Pegawai
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url('/daftar-pegawai') }}" class="nav-link {{ request()->is('daftar-pegawai') ? 'active' : '' }}">
-                    <i class="fa-solid fa-users"></i> Daftar Pegawai
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url('/absensi') }}" class="nav-link {{ request()->is('absensi') ? 'active' : '' }}">
-                    <i class="fa-solid fa-calendar-check"></i> Absensi
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url('/riwayat-absensi') }}" class="nav-link {{ request()->is('riwayat-absensi') ? 'active' : '' }}">
-                    <i class="fa-solid fa-clock-rotate-left"></i> Histori Absen
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url('/histori-gaji') }}" class="nav-link {{ request()->is('histori-gaji*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-money-bill-wave"></i> Histori Gaji
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ url('/setting-libur') }}" class="nav-link {{ request()->is('setting-libur') ? 'active' : '' }}">
-                    <i class="fa-solid fa-calendar-times"></i> Setting Tanggal
-                </a>
-            </li>
+            @auth
+                @if(Auth::user()->role === 'admin')
+                    <!-- Menu khusus Admin -->
+                    <li class="nav-item">
+                        <a href="/dashboard" class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}">
+                            <i class="fa-solid fa-chart-line"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url('/pegawai') }}" class="nav-link {{ request()->is('pegawai') ? 'active' : '' }}">
+                            <i class="fa-solid fa-user-plus"></i> Input Pegawai
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url('/daftar-pegawai') }}" class="nav-link {{ request()->is('daftar-pegawai') ? 'active' : '' }}">
+                            <i class="fa-solid fa-users"></i> Daftar Pegawai
+                        </a>
+                    </li>
+                @endif
+                
+                <!-- Menu untuk semua user (admin & user biasa) -->
+                <li class="nav-item">
+                    <a href="{{ url('/absensi') }}" class="nav-link {{ request()->is('absensi') ? 'active' : '' }}">
+                        <i class="fa-solid fa-calendar-check"></i> Absensi
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('/riwayat-absensi') }}" class="nav-link {{ request()->is('riwayat-absensi') ? 'active' : '' }}">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Histori Absen
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url('/histori-gaji') }}" class="nav-link {{ request()->is('histori-gaji*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-money-bill-wave"></i> Histori Gaji
+                    </a>
+                </li>
+                
+                @if(Auth::user()->role === 'admin')
+                    <!-- Menu khusus Admin -->
+                    <li class="nav-item">
+                        <a href="{{ url('/setting-libur') }}" class="nav-link {{ request()->is('setting-libur') ? 'active' : '' }}">
+                            <i class="fa-solid fa-calendar-times"></i> Setting Tanggal
+                        </a>
+                    </li>
+                @endif
+            @endauth
         </ul>
     </div>
 
@@ -271,11 +282,21 @@
             <span class="badge bg-primary fs-6 py-2 px-3 shadow-sm rounded-pill">{{ date('d M Y') }}</span>
             <div class="dropdown">
                 <div class="d-flex align-items-center cursor-pointer" data-bs-toggle="dropdown" style="cursor:pointer" title="Options">
-                    <div class="text-end me-3 d-none d-md-block">
-                        <h6 class="mb-0 text-dark fw-bold" style="font-size: 0.95rem;">Admin User</h6>
-                        <small class="text-muted d-block" style="font-size: 0.75rem; line-height: 1;">Administrator</small>
-                    </div>
-                    <img src="https://ui-avatars.com/api/?name=Admin&background=1e293b&color=fff" alt="Admin" class="rounded-circle shadow-sm" width="45" height="45">
+                    @auth
+                        <div class="text-end me-3 d-none d-md-block">
+                            <h6 class="mb-0 text-dark fw-bold" style="font-size: 0.95rem;">{{ Auth::user()->name }}</h6>
+                            <small class="text-muted d-block" style="font-size: 0.75rem; line-height: 1;">
+                                {{ Auth::user()->role === 'admin' ? 'Administrator' : 'Pegawai' }}
+                            </small>
+                        </div>
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=1e293b&color=fff" alt="{{ Auth::user()->name }}" class="rounded-circle shadow-sm" width="45" height="45">
+                    @else
+                        <div class="text-end me-3 d-none d-md-block">
+                            <h6 class="mb-0 text-dark fw-bold" style="font-size: 0.95rem;">Guest</h6>
+                            <small class="text-muted d-block" style="font-size: 0.75rem; line-height: 1;">Not Logged In</small>
+                        </div>
+                        <img src="https://ui-avatars.com/api/?name=Guest&background=1e293b&color=fff" alt="Guest" class="rounded-circle shadow-sm" width="45" height="45">
+                    @endauth
                 </div>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 mt-3" style="border-radius: 12px; min-width: 200px;">
                     <li>

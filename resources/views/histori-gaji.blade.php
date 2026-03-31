@@ -26,38 +26,48 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm animate__animated animate__fadeIn mb-4" style="border-radius: 15px;">
-            <div class="card-body p-4">
-                <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-filter me-2"></i>Filter Pegawai</h6>
-                <form action="{{ route('histori-gaji.index') }}" method="GET">
-                    <div class="row align-items-end g-3">
-                        <div class="col-md-5">
-                            <label class="form-label small text-muted">Pilih Pegawai</label>
-                            <select class="form-select select-search" name="employee_id">
-                                <option value="">-- Semua Pegawai --</option>
-                                @foreach($pegawaiList as $p)
-                                    <option value="{{ $p->id }}" {{ request('employee_id') == $p->id ? 'selected' : '' }}>
-                                        {{ $p->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill">
-                                <i class="fa-solid fa-magnifying-glass me-2"></i>Cari
-                            </button>
-                        </div>
-                        @if(request()->filled('employee_id'))
-                        <div class="col-md-2">
-                            <a href="{{ route('histori-gaji.index') }}" class="btn btn-outline-secondary w-100 rounded-pill">
-                                <i class="fa-solid fa-rotate-left me-2"></i>Reset
-                            </a>
-                        </div>
-                        @endif
+        @auth
+            @if(Auth::user()->role === 'admin')
+                {{-- Filter hanya untuk admin --}}
+                <div class="card border-0 shadow-sm animate__animated animate__fadeIn mb-4" style="border-radius: 15px;">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-filter me-2"></i>Filter Pegawai</h6>
+                        <form action="{{ route('histori-gaji.index') }}" method="GET">
+                            <div class="row align-items-end g-3">
+                                <div class="col-md-5">
+                                    <label class="form-label small text-muted">Pilih Pegawai</label>
+                                    <select class="form-select select-search" name="employee_id">
+                                        <option value="">-- Semua Pegawai --</option>
+                                        @foreach($pegawaiList as $p)
+                                            <option value="{{ $p->id }}" {{ request('employee_id') == $p->id ? 'selected' : '' }}>
+                                                {{ $p->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100 rounded-pill">
+                                        <i class="fa-solid fa-magnifying-glass me-2"></i>Cari
+                                    </button>
+                                </div>
+                                @if(request()->filled('employee_id'))
+                                <div class="col-md-2">
+                                    <a href="{{ route('histori-gaji.index') }}" class="btn btn-outline-secondary w-100 rounded-pill">
+                                        <i class="fa-solid fa-rotate-left me-2"></i>Reset
+                                    </a>
+                                </div>
+                                @endif
+                            </div>
+                        </form>
                     </div>
-                </form>
-            </div>
-        </div>
+                </div>
+            @else
+                {{-- Info untuk user biasa --}}
+                <div class="alert alert-info border-0 shadow-sm animate__animated animate__fadeIn mb-4" style="border-radius: 15px;">
+                    <i class="fa-solid fa-info-circle me-2"></i> Anda melihat histori gaji untuk: <strong>{{ Auth::user()->name }}</strong>
+                </div>
+            @endif
+        @endauth
 
         @component('components.datatable', [
             'id' => 'tabelHistoriGaji',

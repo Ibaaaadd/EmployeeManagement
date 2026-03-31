@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'pegawai_id',
     ];
 
     /**
@@ -51,4 +53,14 @@ class User extends Authenticatable
         return $this->belongsTo(Pegawai::class);
     }
 
+    // Helper methods untuk role checking
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUser()
+    {
+        return $this->role === 'user';
+    }
 }

@@ -22,17 +22,35 @@
             <div class="card-body p-4">
                 {{-- Filter Form --}}
                 <form method="GET" action="{{ route('absensi.riwayat') }}" class="row g-3 align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold text-secondary small text-uppercase">Nama Pegawai</label>
-                        <select name="nama" class="form-select select-search">
-                            <option value="">-- Semua Pegawai --</option>
-                            @foreach($pegawaiList ?? [] as $p)
-                                <option value="{{ $p->name }}" {{ request('nama') == $p->name ? 'selected' : '' }}>
-                                    {{ $p->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                    @auth
+                        @if(Auth::user()->role === 'admin')
+                            {{-- Admin bisa filter by nama --}}
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-secondary small text-uppercase">Nama Pegawai</label>
+                                <select name="nama" class="form-select select-search">
+                                    <option value="">-- Semua Pegawai --</option>
+                                    @foreach($pegawaiList ?? [] as $p)
+                                        <option value="{{ $p->name }}" {{ request('nama') == $p->name ? 'selected' : '' }}>
+                                            {{ $p->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @else
+                            {{-- User biasa tidak perlu dropdown, langsung nama sendiri --}}
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold text-secondary small text-uppercase">Pegawai</label>
+                                <input type="text" class="form-control" value="{{ Auth::user()->name }}" disabled readonly>
+                                <small class="text-muted">Menampilkan riwayat absensi Anda</small>
+                            </div>
+                        @endif
+                    @else
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Pegawai</label>
+                            <input type="text" class="form-control" value="Silakan login" disabled readonly>
+                        </div>
+                    @endauth
+                    
                     <div class="col-md-3">
                         <label class="form-label fw-bold text-secondary small text-uppercase">Bulan & Tahun</label>
                         <div class="input-group">

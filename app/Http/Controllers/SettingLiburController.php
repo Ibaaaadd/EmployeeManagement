@@ -4,10 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SettingLibur;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
+/**
+ * @method void middleware(\Closure|string|array $middleware)
+ */
 class SettingLiburController extends Controller
 {
+    public function __construct()
+    {
+        // Hanya admin yang bisa akses controller ini
+        $this->middleware(function ($request, $next) {
+            $user = Auth::user();
+            if (!$user || $user->role !== 'admin') {
+                abort(403, 'Akses ditolak. Halaman ini hanya untuk admin.');
+            }
+            return $next($request);
+        });
+    }
+
     // API methods for existing functionality
     public function getLibur(Request $request)
     {
