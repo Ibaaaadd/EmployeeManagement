@@ -91,11 +91,13 @@
                                 <i class="fa-solid fa-circle-exclamation me-2"></i> Data riwayat absensi yang Anda input tidak tersedia.
                             </div>
                         @else
-                            <div class="table-responsive mb-4">
+                            {{-- Desktop: Table View --}}
+                            <div class="table-responsive mb-4 desktop-view">
                                 <table class="table table-hover align-middle">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th>Jam Masuk</th><th>Jam Pulang</th>
+                                            <th>Jam Masuk</th>
+                                            <th>Jam Pulang</th>
                                             <th>Tanggal</th>
                                             <th>Nama Pegawai</th>
                                             <th>Status</th>
@@ -145,13 +147,81 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            {{-- Mobile: Card View --}}
+                            <div class="mobile-view">
+                                @foreach ($absensis as $absensi)
+                                    <div class="modern-card mb-3">
+                                        <div class="card-header-mobile">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <div>
+                                                    <h6 class="fw-bold text-dark mb-1">{{ $absensi->pegawai->name }}</h6>
+                                                    <small class="text-muted">
+                                                        <i class="fa-regular fa-calendar me-1"></i>
+                                                        {{ \Carbon\Carbon::parse($absensi->attendance_time)->format('d M Y') }}
+                                                    </small>
+                                                </div>
+                                                <div>
+                                                    @if($absensi->status === 'Hadir')
+                                                        <span class="badge bg-success text-white rounded-pill px-3 py-2">
+                                                            <i class="fa-solid fa-check-circle me-1"></i> Hadir
+                                                        </span>
+                                                    @elseif($absensi->status === 'Izin')
+                                                        <span class="badge bg-warning text-white rounded-pill px-3 py-2">
+                                                            <i class="fa-solid fa-envelope-open-text me-1"></i> Izin
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-danger text-white rounded-pill px-3 py-2">
+                                                            <i class="fa-solid fa-xmark-circle me-1"></i> Alpha
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            
+                                            @if($absensi->is_late && $absensi->status === 'Hadir')
+                                                <div class="alert alert-danger alert-sm py-1 px-2 mb-2" style="font-size: 0.75rem;">
+                                                    <i class="fa-solid fa-clock me-1"></i> Terlambat
+                                                </div>
+                                            @endif
+                                        </div>
+                                        
+                                        <div class="card-body-mobile">
+                                            <div class="info-row">
+                                                <div class="info-item">
+                                                    <span class="info-label">Jam Masuk</span>
+                                                    <span class="info-value">
+                                                        <i class="fa-solid fa-arrow-right-to-bracket text-success me-1"></i>
+                                                        {{ $absensi->jam_masuk ? \Carbon\Carbon::parse($absensi->jam_masuk)->format('H:i') : '-' }}
+                                                    </span>
+                                                </div>
+                                                <div class="info-item">
+                                                    <span class="info-label">Jam Pulang</span>
+                                                    <span class="info-value">
+                                                        <i class="fa-solid fa-arrow-right-from-bracket text-danger me-1"></i>
+                                                        {{ $absensi->jam_pulang ? \Carbon\Carbon::parse($absensi->jam_pulang)->format('H:i') : '-' }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            @if($absensi->status === 'Hadir' && $absensi->attendance_photo)
+                                                <div class="mt-3">
+                                                    <a href="{{ asset('storage/' . $absensi->attendance_photo) }}" target="_blank" class="btn btn-outline-primary btn-sm w-100 rounded-pill">
+                                                        <i class="fa-solid fa-image me-1"></i> Lihat Bukti Foto
+                                                    </a>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                             
-                            <div class="mt-4 px-2">
+                            {{-- Modern Pagination --}}
+                            <div class="modern-pagination mt-4">
                                 {{ $absensis->links() }}
                             </div>
 
-                            <div class="text-end mt-3">
-                                <a href="{{ route('absensi.riwayat.download', request()->query()) }}" class="btn btn-danger rounded-pill shadow-sm px-4">
+                            <div class="text-center text-md-end mt-3">
+                                <a href="{{ route('absensi.riwayat.download', request()->query()) }}" class="btn btn-danger rounded-pill shadow-sm px-4 w-100 w-md-auto">
                                     <i class="fa-solid fa-file-pdf me-2"></i> Download Rekap PDF
                                 </a>
                             </div>
@@ -160,7 +230,8 @@
 
                     {{-- Tab: Rekap Per Pegawai --}}
                     <div class="tab-pane fade" id="rekap" role="tabpanel" aria-labelledby="rekap-tab">
-                        <div class="table-responsive">
+                        {{-- Desktop: Table View --}}
+                        <div class="table-responsive desktop-view">
                             <table class="table table-hover align-middle">
                                 <thead class="bg-light">
                                     <tr>
@@ -209,6 +280,72 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        {{-- Mobile: Card View --}}
+                        <div class="mobile-view">
+                            @foreach($rekapPegawai as $pegawai)
+                                <div class="modern-card mb-3">
+                                    <div class="card-header-mobile">
+                                        <h6 class="fw-bold text-dark mb-2">{{ $pegawai['nama'] }}</h6>
+                                    </div>
+                                    
+                                    <div class="card-body-mobile">
+                                        <div class="recap-stats mb-3">
+                                            <div class="stat-item">
+                                                <div class="stat-icon bg-success">
+                                                    <i class="fa-solid fa-check-circle"></i>
+                                                </div>
+                                                <div class="stat-content">
+                                                    <span class="stat-label">Hadir</span>
+                                                    <span class="stat-value text-success">{{ $pegawai['hadir'] }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="stat-item">
+                                                <div class="stat-icon bg-warning">
+                                                    <i class="fa-solid fa-envelope-open-text"></i>
+                                                </div>
+                                                <div class="stat-content">
+                                                    <span class="stat-label">Izin</span>
+                                                    <span class="stat-value text-warning">{{ $pegawai['izin'] }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="stat-item">
+                                                <div class="stat-icon bg-danger">
+                                                    <i class="fa-solid fa-xmark-circle"></i>
+                                                </div>
+                                                <div class="stat-content">
+                                                    <span class="stat-label">Alpha</span>
+                                                    <span class="stat-value text-danger">{{ $pegawai['tidak_hadir'] }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="button" class="btn btn-outline-info btn-sm w-100 rounded-pill" data-bs-toggle="collapse" data-bs-target="#detail-mobile-{{ $loop->index }}">
+                                            <i class="fa-solid fa-eye me-1"></i> Lihat Detail Tanggal
+                                        </button>
+                                        
+                                        <div class="collapse mt-3" id="detail-mobile-{{ $loop->index }}">
+                                            <div class="detail-dates">
+                                                @foreach($pegawai['tanggal'] as $status => $tanggalList)
+                                                    <div class="date-group mb-2">
+                                                        <strong class="d-block mb-1 small text-muted text-uppercase">{{ $status }} :</strong>
+                                                        @if(count($tanggalList) > 0)
+                                                            <div class="d-flex flex-wrap gap-1">
+                                                                @foreach($tanggalList as $tgl)
+                                                                    <span class="badge {{ $status == 'Hadir' ? 'bg-success' : ($status == 'Izin' ? 'bg-warning' : 'bg-danger') }} text-white py-1 px-2">{{ $tgl }}</span>
+                                                                @endforeach
+                                                            </div>
+                                                        @else
+                                                            <span class="text-muted small">-</span>
+                                                        @endif
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
                 </div>
             </div>
@@ -231,6 +368,230 @@
 }
 .nav-tabs .nav-link:hover:not(.active) {
     background-color: #f1f5f9;
+}
+
+/* Modern Card Styling */
+.modern-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #f1f5f9;
+}
+
+.modern-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+}
+
+.card-header-mobile {
+    padding: 16px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.card-body-mobile {
+    padding: 16px;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.info-item {
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* Recap Stats */
+.recap-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 8px;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.stat-icon.bg-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.stat-icon.bg-warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.stat-icon.bg-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.stat-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    color: #64748b;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* Modern Pagination */
+.modern-pagination nav {
+    display: flex;
+    justify-content: center;
+}
+
+.modern-pagination .pagination {
+    gap: 6px;
+}
+
+.modern-pagination .page-link {
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    font-weight: 600;
+    padding: 8px 14px;
+    transition: all 0.3s ease;
+}
+
+.modern-pagination .page-link:hover {
+    background: var(--success-color);
+    color: white;
+    border-color: var(--success-color);
+}
+
+.modern-pagination .page-item.active .page-link {
+    background: var(--success-color);
+    border-color: var(--success-color);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+}
+
+/* Desktop/Mobile Toggle */
+.desktop-view {
+    display: block;
+}
+
+.mobile-view {
+    display: none;
+}
+
+/* Responsive Design */
+@media (max-width: 767.98px) {
+    /* Hide desktop, show mobile */
+    .desktop-view {
+        display: none !important;
+    }
+    
+    .mobile-view {
+        display: block !important;
+    }
+    
+    /* Page adjustments */
+    h2 {
+        font-size: 1.15rem;
+    }
+    
+    .card-header,
+    .card-body {
+        padding: 1rem !important;
+    }
+    
+    /* Tab navigation */
+    #absensiTab {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    #absensiTab::-webkit-scrollbar {
+        display: none;
+    }
+    
+    #absensiTab .nav-item {
+        min-width: 170px;
+        flex-shrink: 0;
+    }
+    
+    #absensiTab .nav-link {
+        margin: 0 !important;
+        white-space: nowrap;
+        font-size: 0.85rem;
+    }
+    
+    /* Button adjustments */
+    .text-center .btn,
+    .text-md-end .btn {
+        width: 100% !important;
+    }
+    
+    /* Info row adjustments for very small screens */
+    @media (max-width: 360px) {
+        .info-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .recap-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .modern-pagination .page-link {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
 }
 </style>
 @endsection

@@ -215,9 +215,139 @@
             transform: translateY(-5px);
             box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
         }
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 240px;
+            }
+            .header {
+                left: 240px;
+                width: calc(100% - 240px);
+                padding: 14px 24px;
+            }
+            .content {
+                margin-left: 240px;
+                padding: 105px 20px 20px;
+            }
+        }
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 86px;
+            }
+            .sidebar .brand-text {
+                display: none;
+            }
+            .sidebar .brand {
+                justify-content: center;
+            }
+            .sidebar .nav-link {
+                margin: 8px 10px;
+                padding: 12px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 0;
+            }
+            .sidebar .nav-link i {
+                margin-right: 0;
+                width: auto;
+                font-size: 1.2rem;
+            }
+            .header {
+                left: 86px;
+                width: calc(100% - 86px);
+                padding: 12px 16px;
+            }
+            .header-title {
+                font-size: 1rem;
+            }
+            .content {
+                margin-left: 86px;
+                padding: 95px 14px 18px;
+            }
+        }
+        @media (max-width: 767.98px) {
+            .header {
+                padding: 10px 12px;
+            }
+            .header .badge {
+                display: none;
+            }
+            body.role-user {
+                padding-bottom: 102px;
+            }
+            body.role-user .sidebar {
+                width: 100%;
+                height: auto;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                top: auto;
+                background: rgba(15, 23, 42, 0.96);
+                backdrop-filter: blur(8px);
+                box-shadow: 0 -10px 24px rgba(15, 23, 42, 0.2);
+                padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+                border-top-left-radius: 18px;
+                border-top-right-radius: 18px;
+            }
+            body.role-user .sidebar .brand {
+                display: none;
+            }
+            body.role-user .sidebar .nav {
+                flex-direction: row !important;
+                justify-content: space-around;
+                align-items: stretch;
+                margin-top: 0 !important;
+                gap: 8px;
+            }
+            body.role-user .sidebar .nav-item {
+                flex: 1;
+                min-width: 0;
+            }
+            body.role-user .sidebar .nav-link {
+                margin: 0;
+                padding: 10px 8px;
+                border-radius: 14px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.72rem;
+                text-align: center;
+                min-height: 66px;
+            }
+            body.role-user .sidebar .nav-link i {
+                margin-right: 0;
+                width: auto;
+                font-size: 1.1rem;
+            }
+            body.role-user .sidebar .nav-link:hover,
+            body.role-user .sidebar .nav-link.active {
+                transform: none;
+                box-shadow: 0 10px 20px rgba(59, 130, 246, 0.25);
+                background: linear-gradient(145deg, rgba(59, 130, 246, 0.25), rgba(59, 130, 246, 0.45));
+            }
+            body.role-user .sidebar .nav-link.active::before {
+                display: none;
+            }
+            body.role-user .header {
+                left: 0;
+                width: 100%;
+            }
+            body.role-user .content {
+                margin-left: 0;
+                padding: 86px 12px 18px;
+            }
+            body.role-user .header {
+                padding: 10px 12px;
+            }
+        }
     </style>
 </head>
-<body>
+@php
+    $isUserRole = auth()->check() && auth()->user()->role !== 'admin';
+@endphp
+<body class="{{ $isUserRole ? 'role-user' : 'role-admin' }}">
     <div class="sidebar">
         <div class="brand">
             <img src="{{ asset('images/logoNew.png') }}" alt="Logo PT Jaya Abadi">
