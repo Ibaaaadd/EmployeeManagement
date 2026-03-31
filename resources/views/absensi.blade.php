@@ -48,7 +48,7 @@
                                                 <i class="fa-solid fa-calendar-check"></i>
                                             </div>
                                             <div class="status-content">
-                                                <h5 class="status-title-modern">🎉 Absensi Lengkap!</h5>
+                                                <h5 class="status-title-modern">Absensi Lengkap!</h5>
                                                 <p class="status-subtitle-modern">Anda telah menyelesaikan absensi hari ini</p>
                                                 <div class="time-info-modern">
                                                     <div class="time-item-modern">
