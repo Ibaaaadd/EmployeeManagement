@@ -23,7 +23,12 @@ class AbsensiController extends Controller
         // Jika user biasa, hanya tampilkan data pegawai miliknya sendiri
         if ($user && $user->role === 'user') {
             if (!$user->pegawai_id) {
-                return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan data pegawai.');
+                session()->now('error', 'Akun Anda belum terhubung dengan data pegawai. Silakan hubungi Admin.');
+                
+                return view('absensi', [
+                    'pegawaiList' => collect([]),
+                    'pegawaiBelumAbsen' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
+                ]);
             }
             
             $pegawaiList = Pegawai::where('id', $user->pegawai_id)->get();

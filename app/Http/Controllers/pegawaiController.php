@@ -7,22 +7,25 @@ use App\Models\Pegawai;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
 /**
  * @method void middleware(\Closure|string|array $middleware)
  */
-class PegawaiController extends Controller
+class PegawaiController extends Controller implements HasMiddleware
 {
-    public function __construct()
+    public static function middleware(): array
     {
-        // Hanya admin yang bisa akses controller ini
-        $this->middleware(function ($request, $next) {
-            $user = Auth::user();
-            if (!$user || $user->role !== 'admin') {
-                abort(403, 'Akses ditolak. Halaman ini hanya untuk admin.');
-            }
-            return $next($request);
-        });
+        return [
+            new Middleware(function ($request, $next) {
+                $user = Auth::user();
+                if (!$user || $user->role !== 'admin') {
+                    abort(403, 'Akses ditolak. Halaman ini hanya untuk admin.');
+                }
+                return $next($request);
+            }),
+        ];
     }
 
     public function index()

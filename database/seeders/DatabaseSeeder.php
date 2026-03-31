@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->command->info('═══════════════════════════════════════════════════════');
         
         $this->call([
-            UserSeeder::class,              // 1. Users (untuk login)
-            PegawaiSeeder::class,           // 2. Pegawai (master data)
+            PegawaiSeeder::class,           // 1. Pegawai (master data)
+            UserSeeder::class,              // 2. Users (untuk login)
             SettingLiburSeeder::class,      // 3. Setting Libur (tanggal merah)
             AbsensiSeeder::class,           // 4. Absensi (2 bulan data)
             RiwayatGajiSeeder::class,       // 5. Riwayat Gaji (auto-calculate dari absensi)

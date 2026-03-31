@@ -27,22 +27,36 @@ class UserSeeder extends Seeder
             ]
         );
 
-        // User biasa (linked ke pegawai jika ada)
-        User::firstOrCreate(
-            ['email' => 'user@example.com'],
-            [
-                'name' => 'User Demo',
-                'email' => 'user@example.com',
-                'email_verified_at' => now(),
-                'password' => Hash::make('password'),
-                'role' => 'user',  // PENTING: Set role user
-                'pegawai_id' => null, // Bisa diset ke pegawai tertentu jika diperlukan
-                'remember_token' => Str::random(10),
-            ]
-        );
+        // Buat akun user untuk setiap pegawai
+        $pegawais = \App\Models\Pegawai::all();
+        $count = 0;
+
+        foreach ($pegawais as $pegawai) {
+            // Ubah nama menjadi format email, contoh "budi1@example.com"
+            $firstName = strtolower(preg_replace('/[^a-zA-Z]/', '', explode(' ', $pegawai->name)[0]));
+            $email = $firstName . $pegawai->id . '@example.com';
+
+            User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => $pegawai->name,
+                    'email' => $email,
+                    'email_verified_at' => now(),
+                    'password' => Hash::make('password'),
+                    'role' => 'user',  
+                    'pegawai_id' => $pegawai->id, 
+                    'remember_token' => Str::random(10),
+                ]
+            );
+            $count++;
+        }
         
-        $this->command->info('✅ 2 users berhasil di-seed!');
+        $this->command->info('✅ ' . ($count + 1) . ' users berhasil di-seed!');
         $this->command->info('   👤 ADMIN: admin@example.com / password (role: admin)');
-        $this->command->info('   👤 USER:  user@example.com / password (role: user)');
+        
+        if ($pegawais->isNotEmpty()) {
+            $firstUserEmail = strtolower(preg_replace('/[^a-zA-Z]/', '', explode(' ', $pegawais->first()->name)[0])) . $pegawais->first()->id . '@example.com';
+            $this->command->info("   👤 CONTOH USER: $firstUserEmail / password (role: user)");
+        }
     }
 }
